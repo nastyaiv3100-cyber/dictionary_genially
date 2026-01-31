@@ -2,69 +2,111 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Словаря v3 (Стильный)</title>
+<title>Генератор Карточек Фразеологизмов</title>
 <style>
-    body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: #eef2f5; padding: 20px; color: #333; }
-    .container { display: flex; gap: 30px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
-    .panel { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); flex: 1; min-width: 320px; }
+    body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: #eaeff2; padding: 20px; color: #333; margin: 0; }
+    .main-layout { display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
     
-    h2 { margin-top: 0; color: #2c3e50; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    .badge { background: #FF9800; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.6em; vertical-align: middle; }
-
-    label { display: block; margin-bottom: 10px; font-weight: 600; color: #555; }
-    input[type="color"] { width: 100%; height: 50px; border: none; border-radius: 12px; cursor: pointer; background: none; padding: 0; }
-    
-    button.primary-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white; border: none; padding: 15px 25px; 
-        font-size: 16px; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 25px;
-        font-weight: bold; transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+    /* Left Panel: Settings */
+    .settings-panel { 
+        background: white; padding: 25px; border-radius: 16px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 350px; flex-shrink: 0; 
+        max-height: 90vh; overflow-y: auto; position: sticky; top: 20px;
     }
-    button.primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4); }
-    
-    textarea { width: 100%; height: 200px; margin-top: 15px; border: 2px solid #eee; border-radius: 12px; padding: 15px; font-family: 'Consolas', monospace; font-size: 13px; resize: vertical; background: #fafafa; color: #555; }
-    textarea:focus { outline: none; border-color: #764ba2; }
 
-    /* Preview Area Styling */
-    #preview-wrapper {
-        border: 2px dashed #dbe2e8;
-        padding: 40px;
-        background-color: #f8f9fa;
-        background-image: radial-gradient(#cbd5e0 1px, transparent 1px);
-        background-size: 20px 20px;
-        border-radius: 16px;
-        min-height: 300px;
-        display: flex; align-items: flex-start; justify-content: center;
+    /* Right Panel: Preview & Code */
+    .preview-panel { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+
+    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+    h3 { margin: 15px 0 10px; font-size: 1rem; color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+    
+    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #666; }
+    .color-group { display: flex; gap: 10px; margin-bottom: 15px; }
+    .color-input { flex: 1; }
+    input[type="color"] { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
+    
+    /* Checkbox List */
+    .word-list { 
+        height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; 
+        padding: 10px; background: #fafafa; margin-bottom: 15px; 
+    }
+    .check-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .check-item:last-child { border-bottom: none; }
+    .check-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+    .check-item span { font-size: 0.95rem; cursor: pointer; }
+
+    .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+    button.small-btn { flex: 1; padding: 5px; background: #eee; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    button.small-btn:hover { background: #ddd; }
+
+    button.generate-btn {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        color: white; border: none; padding: 15px; 
+        font-size: 16px; border-radius: 10px; cursor: pointer; width: 100%; 
+        font-weight: bold; box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
+        transition: transform 0.2s;
+    }
+    button.generate-btn:hover { transform: translateY(-2px); }
+
+    /* Preview Box */
+    .preview-box {
+        background: #fff; border-radius: 16px; padding: 20px; min-height: 400px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 2px dashed #ccc;
+        position: relative;
+    }
+    
+    textarea { 
+        width: 100%; height: 150px; padding: 15px; border-radius: 12px; 
+        border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; 
     }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="panel">
-        <h2>1. Дизайн <span class="badge">v3.0</span></h2>
-        <p style="color: #666; margin-bottom: 20px;">Выберите основной цвет. Виджет автоматически подстроит тени и акценты.</p>
+<div class="main-layout">
+    
+    <div class="settings-panel">
+        <h2>🛠 Настройки</h2>
         
-        <label>Основной цвет (акцент):</label>
-        <input type="color" id="accentColor" value="#6C63FF" oninput="renderPreview()">
+        <h3>1. Цвета</h3>
+        <label>Фон карточки:</label>
+        <div class="color-group"><input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()"></div>
         
-        <br><br>
-        <label>Живой предпросмотр (введите "нос"):</label>
-        <div id="preview-wrapper"></div>
+        <label>Цвет текста:</label>
+        <div class="color-group"><input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()"></div>
 
-        <button class="primary-btn" onclick="generateCode()">✨ Сгенерировать красивый код</button>
+        <label>Фон всей области (виджета):</label>
+        <div class="color-group"><input type="color" id="bgColor" value="#fcfcfc" oninput="updatePreview()"></div>
+
+        <h3>2. Словарь</h3>
+        <p style="font-size: 0.85em; color: #777; margin-top:-10px;">Отметьте галочками нужные фразы:</p>
+        
+        <div class="btn-group">
+            <button class="small-btn" onclick="toggleAll(true)">Выбрать все</button>
+            <button class="small-btn" onclick="toggleAll(false)">Сбросить</button>
+        </div>
+
+        <div class="word-list" id="wordListContainer">
+            </div>
+
+        <button class="generate-btn" onclick="generateCode()">🚀 Получить код</button>
     </div>
 
-    <div class="panel">
-        <h2>2. Код для Genially</h2>
-        <p style="color: #666;">Скопируйте код ниже и вставьте через <b>Insert → Others</b>.</p>
-        <textarea id="resultCode" readonly onclick="this.select()"></textarea>
+    <div class="preview-panel">
+        <div class="preview-box" id="previewArea">
+            </div>
+        
+        <div style="background: white; padding: 20px; border-radius: 16px;">
+            <h3 style="margin-top:0;">Код для вставки в Genially (Insert -> Others)</h3>
+            <textarea id="resultCode" readonly onclick="this.select()"></textarea>
+        </div>
     </div>
+
 </div>
 
 <script>
-    // База данных (та же самая)
+    // --- ДАННЫЕ ---
     const dictionaryDB = {
         "баклуши бить": "Бездельничать, заниматься пустяками.",
         "без году неделя": "Совсем недавно, очень короткое время.",
@@ -87,7 +129,6 @@
         "как две капли воды": "Очень похожи.",
         "как рыба в воде": "Чувствовать себя уверенно.",
         "как с гуся вода": "Всё нипочем, безразлично.",
-        "как снег на голову": "Неожиданно.",
         "клевать носом": "Дремать.",
         "кот наплакал": "Очень мало.",
         "крокодиловы слезы": "Притворное сожаление.",
@@ -112,239 +153,210 @@
         "язык проглотить": "Замолчать."
     };
 
-    function getWidgetMarkup(color, uniqueId) {
-        // SVG Icon definition
-        const searchIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+    // --- 1. ИНИЦИАЛИЗАЦИЯ СПИСКА ---
+    function initList() {
+        const container = document.getElementById('wordListContainer');
+        const keys = Object.keys(dictionaryDB).sort();
+        
+        keys.forEach((key, index) => {
+            const div = document.createElement('div');
+            div.className = 'check-item';
+            
+            // Check first 6 items by default for demo
+            const checked = index < 6 ? 'checked' : '';
+            
+            div.innerHTML = `
+                <label style="display:flex; align-items:center; width:100%; margin:0; cursor:pointer;">
+                    <input type="checkbox" value="${key}" ${checked} onchange="updatePreview()">
+                    <span>${key}</span>
+                </label>
+            `;
+            container.appendChild(div);
+        });
+        updatePreview();
+    }
+
+    function toggleAll(state) {
+        const checkboxes = document.querySelectorAll('#wordListContainer input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = state);
+        updatePreview();
+    }
+
+    // --- 2. ГЕНЕРАТОР HTML (ВНУТРЕННИЙ) ---
+    function getWidgetMarkup(settings, items) {
+        // Generates the Grid of Cards
+        let cardsHTML = '';
+        
+        items.forEach(item => {
+            cardsHTML += `
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <p>${item.phrase}</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>${item.def}</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        // Unique ID to prevent conflicts
+        const uid = 'cards_' + Math.floor(Math.random() * 9999);
 
         return `
-        <div id="app_${uniqueId}" class="widget-wrapper">
+        <div id="${uid}" class="cards-wrapper">
             <style>
-                /* Scoped Styles */
-                #app_${uniqueId}.widget-wrapper {
+                #${uid}.cards-wrapper {
+                    width: 100%;
+                    height: 100%;
+                    padding: 20px;
+                    background-color: ${settings.bgColor};
+                    overflow-y: auto; /* Scroll if too many cards */
                     font-family: 'Segoe UI', sans-serif;
-                    width: 100%;
-                    max-width: 550px;
-                    margin: 0 auto;
+                    box-sizing: border-box;
                 }
                 
-                #app_${uniqueId} .search-container {
-                    position: relative;
-                    width: 100%;
-                    background: white;
-                    border-radius: 50px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                #${uid} .grid-container {
                     display: flex;
-                    align-items: center;
-                    padding: 5px 20px;
-                    transition: box-shadow 0.3s ease;
-                    border: 2px solid transparent;
-                }
-                
-                #app_${uniqueId} .search-container:focus-within {
-                    box-shadow: 0 6px 20px rgba(${parseInt(color.slice(1,3),16)}, ${parseInt(color.slice(3,5),16)}, ${parseInt(color.slice(5,7),16)}, 0.25);
-                    border-color: ${color};
+                    flex-wrap: wrap;
+                    gap: 15px;
+                    justify-content: center;
+                    align-items: flex-start;
                 }
 
-                #app_${uniqueId} .icon-box {
+                /* CARD STYLES */
+                #${uid} .flip-card {
+                    background-color: transparent;
+                    width: 200px;
+                    height: 140px;
+                    perspective: 1000px; /* 3D effect */
+                    cursor: pointer;
+                }
+
+                #${uid} .flip-card-inner {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    text-align: center;
+                    transition: transform 0.6s;
+                    transform-style: preserve-3d;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    border-radius: 12px;
+                }
+
+                #${uid} .flip-card.flipped .flip-card-inner {
+                    transform: rotateY(180deg);
+                }
+
+                #${uid} .flip-card-front, #${uid} .flip-card-back {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    margin-right: 10px;
+                    padding: 10px;
+                    box-sizing: border-box;
                 }
 
-                #app_${uniqueId} input {
-                    border: none;
-                    background: transparent;
-                    width: 100%;
-                    padding: 10px 0;
-                    font-size: 16px;
-                    color: #333;
-                    outline: none;
-                    font-weight: 500;
+                /* FRONT STYLE */
+                #${uid} .flip-card-front {
+                    background-color: ${settings.cardColor};
+                    color: ${settings.textColor};
                 }
-                
-                #app_${uniqueId} input::placeholder { color: #aaa; }
-
-                /* Suggestions Dropdown */
-                #app_${uniqueId} .suggestions-list {
-                    position: absolute;
-                    top: 110%; /* Just below input */
-                    left: 15px;
-                    right: 15px;
-                    background: white;
-                    border-radius: 16px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-                    overflow: hidden;
-                    display: none;
-                    z-index: 100;
-                    opacity: 0;
-                    transform: translateY(-10px);
-                    transition: opacity 0.2s, transform 0.2s;
-                }
-                
-                #app_${uniqueId} .suggestions-list.active {
-                    display: block;
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-
-                #app_${uniqueId} .sug-item {
-                    padding: 12px 20px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #f5f5f5;
-                    transition: background 0.1s;
-                    font-size: 15px;
-                }
-                
-                #app_${uniqueId} .sug-item:last-child { border-bottom: none; }
-                #app_${uniqueId} .sug-item:hover { background: #f8f9fa; color: ${color}; font-weight: 600; }
-
-                /* Result Card with Animation */
-                #app_${uniqueId} .result-box {
-                    margin-top: 20px;
-                    background: rgba(255, 255, 255, 0.95);
-                    backdrop-filter: blur(10px); /* Glass effect */
-                    border-radius: 20px;
-                    padding: 25px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                    display: none;
-                    border-left: 8px solid ${color};
-                    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-                }
-
-                @keyframes slideUp {
-                    from { opacity: 0; transform: translateY(20px) scale(0.95); }
-                    to { opacity: 1; transform: translateY(0) scale(1); }
-                }
-
-                #app_${uniqueId} .result-title {
-                    font-size: 1.4em;
-                    font-weight: 800;
-                    color: ${color};
-                    margin-bottom: 10px;
-                    line-height: 1.2;
+                #${uid} .flip-card-front p {
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    margin: 0;
                     text-transform: uppercase;
-                    letter-spacing: 0.5px;
                 }
 
-                #app_${uniqueId} .result-text {
-                    font-size: 1.1em;
-                    color: #444;
-                    line-height: 1.6;
+                /* BACK STYLE */
+                #${uid} .flip-card-back {
+                    background-color: white;
+                    color: #333;
+                    transform: rotateY(180deg);
+                    border: 3px solid ${settings.cardColor};
                 }
+                #${uid} .flip-card-back p {
+                    font-size: 0.95em;
+                    margin: 0;
+                    line-height: 1.4;
+                }
+
             </style>
-
-            <div class="search-container">
-                <div class="icon-box">${searchIcon}</div>
-                <input type="text" id="inp_${uniqueId}" placeholder="Поиск фразеологизма..." autocomplete="off">
-            </div>
-
-            <div id="sug_${uniqueId}" class="suggestions-list"></div>
-
-            <div id="res_${uniqueId}" class="result-box">
-                <div id="title_${uniqueId}" class="result-title"></div>
-                <div id="desc_${uniqueId}" class="result-text"></div>
+            
+            <div class="grid-container">
+                ${cardsHTML}
             </div>
         </div>
         `;
     }
 
-    function getWidgetScript(uniqueId, dbData) {
-        return `
-        (function(){
-            var db = ${JSON.stringify(dbData)};
-            var input = document.getElementById('inp_${uniqueId}');
-            var sugList = document.getElementById('sug_${uniqueId}');
-            var resBox = document.getElementById('res_${uniqueId}');
-            var title = document.getElementById('title_${uniqueId}');
-            var desc = document.getElementById('desc_${uniqueId}');
-
-            if(!input) return;
-
-            input.addEventListener('input', function() {
-                var val = this.value.toLowerCase().trim();
-                sugList.innerHTML = '';
-                
-                if (!val) {
-                    sugList.classList.remove('active');
-                    // Optional: hide result when clearing input? 
-                    // resBox.style.display = 'none'; 
-                    return;
-                }
-
-                var matches = Object.keys(db).filter(function(k){ return k.indexOf(val) !== -1; });
-                
-                if (matches.length > 0) {
-                    matches.forEach(function(match) {
-                        var div = document.createElement('div');
-                        div.className = 'sug-item';
-                        div.innerText = match;
-                        div.onclick = function() {
-                            selectPhrase(match);
-                        };
-                        sugList.appendChild(div);
-                    });
-                    sugList.classList.add('active');
-                } else {
-                    sugList.classList.remove('active');
-                }
+    // --- 3. ЛОГИКА ОБНОВЛЕНИЯ ---
+    function getSelectedItems() {
+        const checkboxes = document.querySelectorAll('#wordListContainer input[type="checkbox"]:checked');
+        const items = [];
+        checkboxes.forEach(cb => {
+            items.push({
+                phrase: cb.value,
+                def: dictionaryDB[cb.value]
             });
-
-            function selectPhrase(phrase) {
-                input.value = phrase;
-                sugList.classList.remove('active');
-                
-                // Content update
-                title.innerText = phrase;
-                desc.innerText = db[phrase];
-                
-                // Animation reset trigger
-                resBox.style.display = 'none';
-                resBox.offsetHeight; /* trigger reflow */
-                resBox.style.display = 'block';
-            }
-
-            // Close suggestions on click outside
-            document.addEventListener('click', function(e) {
-                if (!input.contains(e.target) && !sugList.contains(e.target)) {
-                    sugList.classList.remove('active');
-                }
-            });
-        })();`;
+        });
+        return items;
     }
 
-    function renderPreview() {
-        const color = document.getElementById('accentColor').value;
-        const container = document.getElementById('preview-wrapper');
-        const uniqueId = 'preview_v3';
+    function updatePreview() {
+        const settings = {
+            cardColor: document.getElementById('cardColor').value,
+            textColor: document.getElementById('textColor').value,
+            bgColor: document.getElementById('bgColor').value
+        };
         
-        container.innerHTML = getWidgetMarkup(color, uniqueId);
+        const items = getSelectedItems();
         
-        const scriptContent = getWidgetScript(uniqueId, dictionaryDB);
-        try {
-            eval(scriptContent.replace(/<\/?script>/g, '')); 
-        } catch(e) { console.error(e); }
+        const container = document.getElementById('previewArea');
+        
+        if (items.length === 0) {
+            container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#999;">Выберите хотя бы один фразеологизм слева</div>';
+            return;
+        }
+
+        container.innerHTML = getWidgetMarkup(settings, items);
     }
 
     function generateCode() {
-        const color = document.getElementById('accentColor').value;
-        const uniqueId = 'dict_' + Math.floor(Math.random() * 9000);
+        const settings = {
+            cardColor: document.getElementById('cardColor').value,
+            textColor: document.getElementById('textColor').value,
+            bgColor: document.getElementById('bgColor').value
+        };
+        const items = getSelectedItems();
+
+        if (items.length === 0) {
+            alert('Сначала выберите слова!');
+            return;
+        }
+
+        const widgetCode = getWidgetMarkup(settings, items);
         
-        const html = getWidgetMarkup(color, uniqueId);
-        const script = getWidgetScript(uniqueId, dictionaryDB);
-        
-        const fullCode = `<div style="width: 100%; height: 100%; background: transparent; overflow: visible;">
-${html}
-<script>${script}<\/script>
+        const fullCode = `<div style="width: 100%; height: 100%; overflow: visible;">
+${widgetCode}
 </div>`;
 
         const textarea = document.getElementById('resultCode');
         textarea.value = fullCode;
-        textarea.style.background = "#e0f2f1"; // Success highlight
-        setTimeout(() => textarea.style.background = "#fafafa", 400);
+        textarea.style.background = "#fff8e1";
+        setTimeout(() => textarea.style.background = "#fff", 500);
     }
 
-    renderPreview();
+    // Start
+    initList();
+
 </script>
 
 </body>
