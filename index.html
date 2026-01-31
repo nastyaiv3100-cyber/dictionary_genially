@@ -2,11 +2,10 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Карточек v5.1 (Wide)</title>
+<title>Генератор Карточек v5.2 (Wrap Fix)</title>
 <style>
     body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; padding: 20px; color: #333; margin: 0; }
     
-    /* ИЗМЕНЕНИЕ 1: Увеличил ширину макета до 98% экрана */
     .main-layout { display: flex; gap: 30px; max-width: 98%; margin: 0 auto; align-items: flex-start; }
     
     .settings-panel { 
@@ -39,10 +38,9 @@
     }
     button.generate-btn:hover { transform: translateY(-2px); }
 
-    /* ИЗМЕНЕНИЕ 2: Увеличил высоту окна предпросмотра */
     .preview-box {
         background: #fff; border-radius: 16px; padding: 0; 
-        min-height: 700px; /* Было 500px, стало 700px */
+        min-height: 700px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 2px dashed #ccc;
         overflow: hidden; 
         position: relative;
@@ -55,13 +53,12 @@
 
 <div class="main-layout">
     <div class="settings-panel">
-        <h2>🛠 Настройки v5.1</h2>
+        <h2>🛠 Настройки v5.2</h2>
         
         <h3>1. Размер (Масштаб)</h3>
         <label>Уменьшить/Увеличить: <span id="scaleVal" class="range-value">1.0</span></label>
         <input type="range" id="scaleInput" min="0.3" max="1.5" step="0.1" value="1.0" oninput="updatePreview()">
-        <p style="font-size:0.8em; color:#888; margin-top:-5px;">Если в Genially слишком крупно, поставьте 0.6 или 0.7</p>
-
+        
         <h3>2. Цвета</h3>
         <label>Цвет карточки:</label>
         <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
@@ -154,22 +151,25 @@
         updatePreview();
     }
 
-    // --- HTML CONTENT GENERATOR ---
+    // --- HTML CONTENT GENERATOR (FIXED WIDTH CALCULATION) ---
     function getInnerHtml(settings, items) {
         return `
         <!DOCTYPE html>
         <html>
         <head>
         <style>
-            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; overflow: hidden; }
+            /* IMPORTANT: Body width set to viewport width */
+            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; width: 100vw; overflow-x: hidden; }
             
             /* Main Scale Container */
             .scaler {
+                /* FORCE WIDTH based on scale to ensure wrapping works */
+                width: calc(100vw / ${settings.scale} - 20px); 
                 transform: scale(${settings.scale});
-                transform-origin: top left;
-                width: ${100 / settings.scale}%; /* Компенсация ширины */
+                transform-origin: 0 0; /* Top Left origin */
+                
                 display: flex; 
-                flex-wrap: wrap; 
+                flex-wrap: wrap; /* Must wrap */
                 gap: 15px; 
                 justify-content: center;
                 padding: 10px;
@@ -210,7 +210,6 @@
             scale: document.getElementById('scaleInput').value
         };
         
-        // Update label text
         document.getElementById('scaleVal').innerText = settings.scale;
 
         const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
@@ -219,7 +218,7 @@
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         iframe.style.border = "none";
-        iframe.style.background = "#fcfcfc"; // Background only for preview
+        iframe.style.background = "#fcfcfc";
         
         document.getElementById('previewArea').innerHTML = '';
         document.getElementById('previewArea').appendChild(iframe);
