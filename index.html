@@ -2,36 +2,36 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Словаря Фразеологизмов для Genially</title>
+<title>Генератор Словаря (Исправленный)</title>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
-    .container { display: flex; gap: 20px; max-width: 1000px; margin: 0 auto; }
-    .editor, .output { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex: 1; }
-    h2 { margin-top: 0; color: #444; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding: 20px; color: #333; }
+    .container { display: flex; gap: 20px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; }
+    .editor, .output { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex: 1; min-width: 300px; }
+    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; margin-bottom: 15px; }
     
-    label { display: block; margin-bottom: 8px; font-weight: bold; }
-    input[type="color"] { width: 100%; height: 40px; border: none; cursor: pointer; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+    input[type="color"] { width: 100%; height: 45px; border: 2px solid #ddd; border-radius: 8px; padding: 2px; cursor: pointer; }
     
     button {
-        background: #4A90E2; color: white; border: none; padding: 12px 20px; 
+        background: #2196F3; color: white; border: none; padding: 14px 20px; 
         font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px;
-        transition: background 0.2s;
+        font-weight: bold; transition: background 0.2s;
     }
-    button:hover { background: #357ABD; }
+    button:hover { background: #1976D2; }
     
-    textarea { width: 100%; height: 200px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 12px; }
+    textarea { width: 100%; height: 250px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.4; resize: vertical; background: #fafafa; }
 
-    /* Preview Box Styles meant to mimic the widget */
-    #preview-box {
+    /* Preview Box Styles */
+    #preview-wrapper {
         border: 2px dashed #ccc;
-        padding: 20px;
-        background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee), 
-                          linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee);
+        padding: 30px;
+        background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
+                          linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
         background-size: 20px 20px;
         background-position: 0 0, 10px 10px;
         border-radius: 8px;
-        min-height: 200px;
-        display: flex; align-items: center; justify-content: center;
+        min-height: 250px;
+        display: flex; align-items: flex-start; justify-content: center;
     }
 </style>
 </head>
@@ -39,234 +39,215 @@
 
 <div class="container">
     <div class="editor">
-        <h2>1. Настройка</h2>
-        <p>Выберите цвет акцента (кнопки и рамок):</p>
-        <label>Цвет элементов:</label>
-        <input type="color" id="accentColor" value="#FF9800" oninput="updatePreview()">
+        <h2>1. Настройка и Тест</h2>
+        <p style="font-size: 0.9em; color: #666;">Попробуйте ввести "нос" или "бить" в поле ниже.</p>
         
-        <p>Проверьте, как работает поиск:</p>
-        <div id="preview-box">
-            <div id="widget-mockup" style="width: 100%;"></div>
-        </div>
+        <label>Цвет оформления:</label>
+        <input type="color" id="accentColor" value="#FF9800" oninput="renderPreview()">
+        
+        <br><br>
+        <label>Предпросмотр (Живой тест):</label>
+        <div id="preview-wrapper">
+            </div>
 
-        <button onclick="generateCode()">2. Получить код для Genially</button>
+        <button onclick="generateCode()">2. Сгенерировать код</button>
     </div>
 
     <div class="output">
-        <h2>3. Код для вставки</h2>
-        <p>Скопируйте этот код и вставьте в Genially через <b>Insert -> Others</b>.</p>
+        <h2>3. Код для Genially</h2>
+        <p style="font-size: 0.9em; color: #666;">Нажмите кнопку слева, затем скопируйте этот код и вставьте в Genially через <b>Insert → Others</b>.</p>
         <textarea id="resultCode" readonly onclick="this.select()"></textarea>
     </div>
 </div>
 
 <script>
-    // Database parsed from your provided file
+    // База данных фразеологизмов
     const dictionaryDB = {
-        "баклуши бить": "Бездельничать, заниматься пустяками[cite: 1, 2].",
-        "без году неделя": "Совсем недавно, очень короткое время[cite: 1].",
-        "белая ворона": "Человек, резко выделяющийся из окружающей среды теми или иными качествами[cite: 1].",
-        "блоху подковать": "Искусно выполнить самую замысловатую, точную работу[cite: 1].",
-        "в ежовых рукавицах": "Очень строго, сурово, в большой строгости[cite: 3, 8].",
-        "в час по чайной ложке": "Очень медленно[cite: 3].",
-        "вешать голову": "Унывать[cite: 5].",
-        "вилами по воде писано": "Еще неизвестно как будет, исход не ясен[cite: 6].",
-        "витать в облаках": "Блаженно грезить, фантазировать невесть о чем[cite: 5].",
+        "баклуши бить": "Бездельничать, заниматься пустяками.",
+        "без году неделя": "Совсем недавно, очень короткое время.",
+        "белая ворона": "Человек, резко выделяющийся из окружающей среды.",
+        "блоху подковать": "Искусно выполнить самую замысловатую работу.",
+        "в ежовых рукавицах": "Очень строго, сурово.",
+        "в час по чайной ложке": "Очень медленно.",
+        "вешать голову": "Унывать.",
+        "вилами по воде писано": "Исход не ясен, неизвестно как будет.",
+        "витать в облаках": "Фантазировать, мечтать.",
         "водить за нос": "Обманывать, вводить в заблуждение.",
-        "водой не разлить": "Так говорят о тех, кто крепко дружит[cite: 5].",
-        "волосы дыбом": "Становится очень страшно[cite: 5].",
-        "вывести на чистую воду": "Разоблачить темные дела, уличить во лжи[cite: 7].",
-        "делать из мухи слона": "Преувеличивать что-либо, превращать мелкий факт в целое событие[cite: 12, 17].",
-        "держать язык за зубами": "Молчать, не говорить лишнего.",
-        "душа в пятки": "Стало очень страшно, боязно.",
-        "зарубить на носу": "Твёрдо запомнить, запомнить крепко-накрепко, навсегда[cite: 15, 16].",
-        "как в воду глядел": "Как будто знал заранее, предвидел, точно предсказал события[cite: 18].",
-        "как две капли воды": "Очень похожи, неотличимы[cite: 17, 20].",
-        "как рыба в воде": "Чувствовать себя уверенно, свободно и непринужденно[cite: 17, 22].",
-        "как с гуся вода": "О безразличии к событиям, когда человеку всё нипочем[cite: 17, 23].",
-        "как снег на голову": "Совершенно неожиданно[cite: 18].",
-        "клевать носом": "Дремать[cite: 18].",
+        "водой не разлить": "О крепкой дружбе.",
+        "волосы дыбом": "Очень страшно.",
+        "вывести на чистую воду": "Разоблачить, уличить во лжи.",
+        "делать из мухи слона": "Сильно преувеличивать.",
+        "держать язык за зубами": "Молчать.",
+        "душа в пятки": "Сильный испуг.",
+        "зарубить на носу": "Крепко запомнить навсегда.",
+        "как в воду глядел": "Предвидел события.",
+        "как две капли воды": "Очень похожи.",
+        "как рыба в воде": "Чувствовать себя уверенно.",
+        "как с гуся вода": "Всё нипочем, безразлично.",
+        "как снег на голову": "Неожиданно.",
+        "клевать носом": "Дремать.",
         "кот наплакал": "Очень мало.",
-        "крокодиловы слезы": "Лицемерное, притворное сожаление.",
-        "медведь на ухо наступил": "Нет музыкального слуха[cite: 27].",
-        "морочить голову": "Дурачить, сбивать с толку[cite: 27].",
-        "на седьмом небе": "Быть в полном восторге, в состоянии наивысшего блаженства[cite: 29].",
-        "не в своей тарелке": "Чувствовать себя неуютно, неловко.",
-        "ни пуха ни пера": "Пожелание удачи[cite: 29].",
-        "обвести вокруг пальца": "Ловко обмануть[cite: 31].",
-        "после дождичка в четверг": "Никогда[cite: 32].",
-        "родиться в рубашке": "Быть удачливым человеком, которому часто везет[cite: 32].",
-        "семь пятниц на неделе": "О человеке, который часто и легко меняет свои решения[cite: 33, 36].",
-        "сесть в калошу": "Потерпеть неудачу, оказаться в смешном положении[cite: 37].",
+        "крокодиловы слезы": "Притворное сожаление.",
+        "медведь на ухо наступил": "Нет музыкального слуха.",
+        "морочить голову": "Сбивать с толку.",
+        "на седьмом небе": "В полном восторге.",
+        "не в своей тарелке": "Чувствовать себя неуютно.",
+        "ни пуха ни пера": "Пожелание удачи.",
+        "обвести вокруг пальца": "Ловко обмануть.",
+        "после дождичка в четверг": "Никогда.",
+        "семь пятниц на неделе": "О человеке, часто меняющем решения.",
+        "сесть в калошу": "Оказаться в смешном положении, неудача.",
         "сидеть сложа руки": "Бездельничать.",
-        "сквозь землю провалиться": "Очень сильно стыдиться.",
-        "смотреть сквозь пальцы": "Сознательно не замечать чего-либо плохого.",
-        "собаку съел": "Иметь большой опыт в чем-либо[cite: 34].",
-        "считать ворон": "Глазеть по сторонам, отвлекаться.",
-        "тише воды ниже травы": "Быть незаметным и скромным[cite: 40].",
-        "тянуть кота за хвост": "Медлить, затягивать дело.",
-        "умывать руки": "Устраняться от ответственности.",
-        "хоть глаз выколи": "Темно, ничего не видно[cite: 41].",
-        "язык проглотить": "Замолчать, лишиться дара речи[cite: 43]."
+        "сквозь землю провалиться": "Сильно стыдиться.",
+        "смотреть сквозь пальцы": "Не замечать плохого.",
+        "собаку съел": "Иметь большой опыт.",
+        "считать ворон": "Отвлекаться.",
+        "тише воды ниже травы": "Быть незаметным.",
+        "тянуть кота за хвост": "Медлить.",
+        "умывать руки": "Снимать с себя ответственность.",
+        "хоть глаз выколи": "Очень темно.",
+        "язык проглотить": "Замолчать."
     };
 
-    // Function to generate the inner HTML for the widget
-    function getWidgetHTML(color, isPreview = false) {
-        const uniqueId = isPreview ? 'prev' : 'gen_' + Math.floor(Math.random() * 1000);
-        
-        // Convert DB to string for embedding
-        const dbString = JSON.stringify(dictionaryDB);
-
+    // Функция, создающая HTML структуру виджета
+    function getWidgetMarkup(color, uniqueId) {
         return `
         <div id="wrapper_${uniqueId}" style="width: 100%; max-width: 500px; margin: 0 auto; font-family: 'Arial', sans-serif;">
             <style>
-                #wrapper_${uniqueId} .search-box {
-                    position: relative;
-                    display: flex;
-                    gap: 10px;
-                }
+                #wrapper_${uniqueId} * { box-sizing: border-box; }
+                #wrapper_${uniqueId} .search-box { position: relative; width: 100%; }
                 #wrapper_${uniqueId} input {
-                    width: 100%;
-                    padding: 12px 15px;
-                    border: 2px solid ${color};
-                    border-radius: 25px;
-                    font-size: 16px;
-                    outline: none;
-                    background: rgba(255, 255, 255, 0.9);
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                    transition: all 0.3s;
-                }
-                #wrapper_${uniqueId} input:focus {
-                    box-shadow: 0 4px 10px rgba(${parseInt(color.slice(1,3),16)}, ${parseInt(color.slice(3,5),16)}, ${parseInt(color.slice(5,7),16)}, 0.3);
-                }
-                #wrapper_${uniqueId} .result-card {
-                    margin-top: 15px;
-                    padding: 15px;
-                    background: rgba(255, 255, 255, 0.95);
-                    border-left: 5px solid ${color};
-                    border-radius: 8px;
+                    width: 100%; padding: 12px 20px; border: 2px solid ${color}; border-radius: 30px;
+                    font-size: 16px; outline: none; background: rgba(255, 255, 255, 0.95);
                     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                    display: none; /* Hidden by default */
-                    animation: fadeIn 0.3s ease-in-out;
-                }
-                #wrapper_${uniqueId} .phrase-title {
-                    font-weight: bold;
-                    font-size: 1.2em;
-                    color: ${color};
-                    margin-bottom: 5px;
-                    text-transform: uppercase;
-                }
-                #wrapper_${uniqueId} .phrase-desc {
-                    color: #333;
-                    line-height: 1.4;
-                    font-size: 1em;
                 }
                 #wrapper_${uniqueId} .suggestions {
-                    position: absolute;
-                    top: 100%;
-                    left: 10px;
-                    right: 10px;
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-                    z-index: 100;
-                    max-height: 150px;
-                    overflow-y: auto;
-                    display: none;
+                    position: absolute; top: 100%; left: 10px; right: 10px; margin-top: 5px;
+                    background: white; border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 9999; max-height: 200px; overflow-y: auto; display: none;
+                    border: 1px solid #eee;
                 }
                 #wrapper_${uniqueId} .suggestion-item {
-                    padding: 10px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #eee;
+                    padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #444;
                 }
-                #wrapper_${uniqueId} .suggestion-item:hover {
-                    background: #f9f9f9;
-                    color: ${color};
+                #wrapper_${uniqueId} .suggestion-item:hover { background: #f9f9f9; color: ${color}; font-weight: bold; }
+                #wrapper_${uniqueId} .result-card {
+                    margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.95);
+                    border-left: 6px solid ${color}; border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;
                 }
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+                #wrapper_${uniqueId} .phrase-title { font-weight: bold; font-size: 1.1em; color: ${color}; margin-bottom: 8px; text-transform: uppercase; }
+                #wrapper_${uniqueId} .phrase-desc { color: #333; line-height: 1.5; font-size: 1em; }
             </style>
-
             <div class="search-box">
-                <input type="text" id="inp_${uniqueId}" placeholder="Введите фразеологизм..." autocomplete="off">
+                <input type="text" id="inp_${uniqueId}" placeholder="Найти фразеологизм..." autocomplete="off">
                 <div class="suggestions" id="sug_${uniqueId}"></div>
             </div>
-            
             <div id="res_${uniqueId}" class="result-card">
                 <div class="phrase-title" id="title_${uniqueId}"></div>
                 <div class="phrase-desc" id="desc_${uniqueId}"></div>
             </div>
-
-            <script>
-                (function(){
-                    const db = ${dbString};
-                    const input = document.getElementById('inp_${uniqueId}');
-                    const suggestions = document.getElementById('sug_${uniqueId}');
-                    const resultCard = document.getElementById('res_${uniqueId}');
-                    const titleDiv = document.getElementById('title_${uniqueId}');
-                    const descDiv = document.getElementById('desc_${uniqueId}');
-
-                    input.addEventListener('input', function() {
-                        const val = this.value.toLowerCase().trim();
-                        suggestions.innerHTML = '';
-                        if (!val) {
-                            suggestions.style.display = 'none';
-                            resultCard.style.display = 'none';
-                            return;
-                        }
-
-                        const matches = Object.keys(db).filter(k => k.includes(val));
-                        
-                        if (matches.length > 0) {
-                            suggestions.style.display = 'block';
-                            matches.forEach(match => {
-                                const div = document.createElement('div');
-                                div.className = 'suggestion-item';
-                                div.innerText = match;
-                                div.onclick = () => selectPhrase(match);
-                                suggestions.appendChild(div);
-                            });
-                        } else {
-                            suggestions.style.display = 'none';
-                        }
-                    });
-
-                    // Hide suggestions when clicking outside
-                    document.addEventListener('click', function(e) {
-                        if (e.target !== input) suggestions.style.display = 'none';
-                    });
-
-                    function selectPhrase(phrase) {
-                        input.value = phrase;
-                        suggestions.style.display = 'none';
-                        
-                        titleDiv.innerText = phrase;
-                        descDiv.innerText = db[phrase];
-                        resultCard.style.display = 'block';
-                    }
-                })();
-            <\/script>
-        </div>
-        `;
+        </div>`;
     }
 
-    function updatePreview() {
+    // Логика виджета (скрипт)
+    function getWidgetScript(uniqueId, dbData) {
+        return `
+        (function(){
+            var db = ${JSON.stringify(dbData)};
+            var input = document.getElementById('inp_${uniqueId}');
+            var sugBox = document.getElementById('sug_${uniqueId}');
+            var resCard = document.getElementById('res_${uniqueId}');
+            var titleDiv = document.getElementById('title_${uniqueId}');
+            var descDiv = document.getElementById('desc_${uniqueId}');
+
+            if(!input) return;
+
+            input.addEventListener('input', function() {
+                var val = this.value.toLowerCase().trim();
+                sugBox.innerHTML = '';
+                if (!val) {
+                    sugBox.style.display = 'none';
+                    resCard.style.display = 'none';
+                    return;
+                }
+                var matches = Object.keys(db).filter(function(k){ return k.indexOf(val) !== -1; });
+                
+                if (matches.length > 0) {
+                    sugBox.style.display = 'block';
+                    matches.forEach(function(match) {
+                        var div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerText = match;
+                        div.onclick = function() {
+                            input.value = match;
+                            sugBox.style.display = 'none';
+                            titleDiv.innerText = match;
+                            descDiv.innerText = db[match];
+                            resCard.style.display = 'block';
+                        };
+                        sugBox.appendChild(div);
+                    });
+                } else {
+                    sugBox.style.display = 'none';
+                }
+            });
+
+            // Скрыть при клике вне
+            document.addEventListener('click', function(e) {
+                if (e.target !== input) sugBox.style.display = 'none';
+            });
+        })();`;
+    }
+
+    // 1. Функция для живого предпросмотра (запускает скрипт вручную)
+    function renderPreview() {
         const color = document.getElementById('accentColor').value;
-        const container = document.getElementById('widget-mockup');
-        container.innerHTML = getWidgetHTML(color, true);
+        const container = document.getElementById('preview-wrapper');
+        const uniqueId = 'preview_mode';
+        
+        // Вставляем HTML
+        container.innerHTML = getWidgetMarkup(color, uniqueId);
+        
+        // ВРУЧНУЮ запускаем логику для предпросмотра
+        // Мы используем eval здесь, чтобы код заработал "на лету" в браузере пользователя без перезагрузки
+        // В Genially eval не нужен, там скрипт сработает сам.
+        const scriptContent = getWidgetScript(uniqueId, dictionaryDB);
+        // Убираем обертку тега <script> если она есть, eval выполняет чистый JS
+        const cleanScript = scriptContent.replace(/<\/?script>/g, '');
+        try {
+            eval(cleanScript); 
+        } catch(e) {
+            console.error("Ошибка предпросмотра:", e);
+        }
     }
 
+    // 2. Функция генерации кода для копирования
     function generateCode() {
         const color = document.getElementById('accentColor').value;
-        const widgetCode = getWidgetHTML(color, false);
-        const fullCode = `<div style="width: 100%; height: 100%; background: transparent; overflow: visible;">
-${widgetCode}
+        // Генерируем случайный ID, чтобы можно было вставить несколько виджетов на одну страницу
+        const uniqueId = 'gen_' + Math.floor(Math.random() * 10000);
+        
+        const html = getWidgetMarkup(color, uniqueId);
+        const script = getWidgetScript(uniqueId, dictionaryDB);
+        
+        const fullCode = `<div style="width: 100%; height: 100%; background: transparent;">
+${html}
+<script>${script}<\/script>
 </div>
 `;
+
+        const textarea = document.getElementById('resultCode');
+        textarea.value = fullCode;
         
-        document.getElementById('resultCode').value = fullCode;
+        // Эффект мигания для подтверждения
+        textarea.style.background = "#e8f5e9";
+        setTimeout(() => textarea.style.background = "#fafafa", 300);
     }
 
-    // Initialize
-    updatePreview();
+    // Запуск при загрузке
+    renderPreview();
 </script>
 
 </body>
