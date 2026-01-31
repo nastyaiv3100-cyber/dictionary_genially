@@ -2,111 +2,80 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Карточек Фразеологизмов</title>
+<title>Генератор Карточек (Genially Safe Mode)</title>
 <style>
-    body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: #eaeff2; padding: 20px; color: #333; margin: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; padding: 20px; color: #333; margin: 0; }
     .main-layout { display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
     
-    /* Left Panel: Settings */
     .settings-panel { 
         background: white; padding: 25px; border-radius: 16px; 
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 350px; flex-shrink: 0; 
         max-height: 90vh; overflow-y: auto; position: sticky; top: 20px;
     }
 
-    /* Right Panel: Preview & Code */
     .preview-panel { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
 
-    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-    h3 { margin: 15px 0 10px; font-size: 1rem; color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-    
+    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
     label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #666; }
-    .color-group { display: flex; gap: 10px; margin-bottom: 15px; }
-    .color-input { flex: 1; }
     input[type="color"] { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
     
-    /* Checkbox List */
-    .word-list { 
-        height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; 
-        padding: 10px; background: #fafafa; margin-bottom: 15px; 
-    }
+    .word-list { height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 10px; background: #fafafa; margin-bottom: 15px; }
     .check-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-    .check-item:last-child { border-bottom: none; }
-    .check-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
-    .check-item span { font-size: 0.95rem; cursor: pointer; }
-
-    .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
-    button.small-btn { flex: 1; padding: 5px; background: #eee; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-    button.small-btn:hover { background: #ddd; }
-
+    .check-item input { margin-right: 10px; transform: scale(1.2); }
+    
     button.generate-btn {
-        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
         color: white; border: none; padding: 15px; 
         font-size: 16px; border-radius: 10px; cursor: pointer; width: 100%; 
-        font-weight: bold; box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
-        transition: transform 0.2s;
+        font-weight: bold; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
     }
     button.generate-btn:hover { transform: translateY(-2px); }
 
-    /* Preview Box */
     .preview-box {
         background: #fff; border-radius: 16px; padding: 20px; min-height: 400px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        border: 2px dashed #ccc;
-        position: relative;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 2px dashed #ccc;
     }
     
-    textarea { 
-        width: 100%; height: 150px; padding: 15px; border-radius: 12px; 
-        border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; 
-    }
+    textarea { width: 100%; height: 150px; padding: 15px; border-radius: 12px; border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; }
 </style>
 </head>
 <body>
 
 <div class="main-layout">
-    
     <div class="settings-panel">
-        <h2>🛠 Настройки</h2>
+        <h2>🛠 Настройки v4.0</h2>
         
-        <h3>1. Цвета</h3>
-        <label>Фон карточки:</label>
-        <div class="color-group"><input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()"></div>
-        
+        <label>Цвет карточки:</label>
+        <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
+        <br>
         <label>Цвет текста:</label>
-        <div class="color-group"><input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()"></div>
+        <input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()">
+        <br>
+        <label>Фон (для теста):</label>
+        <input type="color" id="bgColor" value="#fcfcfc" oninput="updatePreview()">
 
-        <label>Фон всей области (виджета):</label>
-        <div class="color-group"><input type="color" id="bgColor" value="#fcfcfc" oninput="updatePreview()"></div>
+        <h3 style="margin-bottom: 5px;">Словарь</h3>
+        <button onclick="toggleAll(true)" style="margin-bottom:10px; cursor:pointer;">Выбрать все</button>
+        <button onclick="toggleAll(false)" style="margin-bottom:10px; cursor:pointer;">Сбросить</button>
 
-        <h3>2. Словарь</h3>
-        <p style="font-size: 0.85em; color: #777; margin-top:-10px;">Отметьте галочками нужные фразы:</p>
-        
-        <div class="btn-group">
-            <button class="small-btn" onclick="toggleAll(true)">Выбрать все</button>
-            <button class="small-btn" onclick="toggleAll(false)">Сбросить</button>
-        </div>
+        <div class="word-list" id="wordListContainer"></div>
 
-        <div class="word-list" id="wordListContainer">
-            </div>
-
-        <button class="generate-btn" onclick="generateCode()">🚀 Получить код</button>
+        <button class="generate-btn" onclick="generateCode()">📦 Упаковать код</button>
     </div>
 
     <div class="preview-panel">
-        <div class="preview-box" id="previewArea">
-            </div>
+        <div class="preview-box" id="previewArea"></div>
         
         <div style="background: white; padding: 20px; border-radius: 16px;">
-            <h3 style="margin-top:0;">Код для вставки в Genially (Insert -> Others)</h3>
+            <h3 style="margin-top:0;">Код для Genially (Iframe версия)</h3>
+            <p style="font-size: 0.8em; color: #666;">Этот код работает как отдельное окно. Genially примет его без проблем.</p>
             <textarea id="resultCode" readonly onclick="this.select()"></textarea>
         </div>
     </div>
-
 </div>
 
 <script>
-    // --- ДАННЫЕ ---
+    // DATA
     const dictionaryDB = {
         "баклуши бить": "Бездельничать, заниматься пустяками.",
         "без году неделя": "Совсем недавно, очень короткое время.",
@@ -153,161 +122,51 @@
         "язык проглотить": "Замолчать."
     };
 
-    // --- 1. ИНИЦИАЛИЗАЦИЯ СПИСКА ---
     function initList() {
         const container = document.getElementById('wordListContainer');
-        const keys = Object.keys(dictionaryDB).sort();
-        
-        keys.forEach((key, index) => {
+        Object.keys(dictionaryDB).sort().forEach((key, i) => {
             const div = document.createElement('div');
             div.className = 'check-item';
-            
-            // Check first 6 items by default for demo
-            const checked = index < 6 ? 'checked' : '';
-            
-            div.innerHTML = `
-                <label style="display:flex; align-items:center; width:100%; margin:0; cursor:pointer;">
-                    <input type="checkbox" value="${key}" ${checked} onchange="updatePreview()">
-                    <span>${key}</span>
-                </label>
-            `;
+            div.innerHTML = `<label style="width:100%; cursor:pointer;"><input type="checkbox" value="${key}" ${i<6?'checked':''} onchange="updatePreview()"> ${key}</label>`;
             container.appendChild(div);
         });
         updatePreview();
     }
 
     function toggleAll(state) {
-        const checkboxes = document.querySelectorAll('#wordListContainer input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = state);
+        document.querySelectorAll('#wordListContainer input').forEach(cb => cb.checked = state);
         updatePreview();
     }
 
-    // --- 2. ГЕНЕРАТОР HTML (ВНУТРЕННИЙ) ---
-    function getWidgetMarkup(settings, items) {
-        // Generates the Grid of Cards
-        let cardsHTML = '';
-        
-        items.forEach(item => {
-            cardsHTML += `
-            <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <p>${item.phrase}</p>
-                    </div>
-                    <div class="flip-card-back">
-                        <p>${item.def}</p>
+    // --- ВНУТРЕННИЙ ШАБЛОН (ТО, ЧТО БУДЕТ ВНУТРИ IFRAME) ---
+    function getInnerHtml(settings, items) {
+        return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+            body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background-color: ${settings.bgColor}; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+            .flip-card { background-color: transparent; width: 180px; height: 120px; perspective: 1000px; cursor: pointer; }
+            .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; }
+            .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+            .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; }
+            .flip-card-front { background-color: ${settings.cardColor}; color: ${settings.textColor}; }
+            .flip-card-front p { font-size: 1.1em; font-weight: bold; margin: 0; text-transform: uppercase; }
+            .flip-card-back { background-color: white; color: #333; transform: rotateY(180deg); border: 3px solid ${settings.cardColor}; }
+            .flip-card-back p { font-size: 0.9em; margin: 0; line-height: 1.3; }
+        </style>
+        </head>
+        <body>
+            ${items.map(item => `
+                <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front"><p>${item.phrase}</p></div>
+                        <div class="flip-card-back"><p>${item.def}</p></div>
                     </div>
                 </div>
-            </div>`;
-        });
-
-        // Unique ID to prevent conflicts
-        const uid = 'cards_' + Math.floor(Math.random() * 9999);
-
-        return `
-        <div id="${uid}" class="cards-wrapper">
-            <style>
-                #${uid}.cards-wrapper {
-                    width: 100%;
-                    height: 100%;
-                    padding: 20px;
-                    background-color: ${settings.bgColor};
-                    overflow-y: auto; /* Scroll if too many cards */
-                    font-family: 'Segoe UI', sans-serif;
-                    box-sizing: border-box;
-                }
-                
-                #${uid} .grid-container {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                    justify-content: center;
-                    align-items: flex-start;
-                }
-
-                /* CARD STYLES */
-                #${uid} .flip-card {
-                    background-color: transparent;
-                    width: 200px;
-                    height: 140px;
-                    perspective: 1000px; /* 3D effect */
-                    cursor: pointer;
-                }
-
-                #${uid} .flip-card-inner {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                    text-align: center;
-                    transition: transform 0.6s;
-                    transform-style: preserve-3d;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    border-radius: 12px;
-                }
-
-                #${uid} .flip-card.flipped .flip-card-inner {
-                    transform: rotateY(180deg);
-                }
-
-                #${uid} .flip-card-front, #${uid} .flip-card-back {
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    -webkit-backface-visibility: hidden;
-                    backface-visibility: hidden;
-                    border-radius: 12px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 10px;
-                    box-sizing: border-box;
-                }
-
-                /* FRONT STYLE */
-                #${uid} .flip-card-front {
-                    background-color: ${settings.cardColor};
-                    color: ${settings.textColor};
-                }
-                #${uid} .flip-card-front p {
-                    font-size: 1.2em;
-                    font-weight: bold;
-                    margin: 0;
-                    text-transform: uppercase;
-                }
-
-                /* BACK STYLE */
-                #${uid} .flip-card-back {
-                    background-color: white;
-                    color: #333;
-                    transform: rotateY(180deg);
-                    border: 3px solid ${settings.cardColor};
-                }
-                #${uid} .flip-card-back p {
-                    font-size: 0.95em;
-                    margin: 0;
-                    line-height: 1.4;
-                }
-
-            </style>
-            
-            <div class="grid-container">
-                ${cardsHTML}
-            </div>
-        </div>
-        `;
-    }
-
-    // --- 3. ЛОГИКА ОБНОВЛЕНИЯ ---
-    function getSelectedItems() {
-        const checkboxes = document.querySelectorAll('#wordListContainer input[type="checkbox"]:checked');
-        const items = [];
-        checkboxes.forEach(cb => {
-            items.push({
-                phrase: cb.value,
-                def: dictionaryDB[cb.value]
-            });
-        });
-        return items;
+            `).join('')}
+        </body>
+        </html>`;
     }
 
     function updatePreview() {
@@ -316,47 +175,53 @@
             textColor: document.getElementById('textColor').value,
             bgColor: document.getElementById('bgColor').value
         };
+        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
         
-        const items = getSelectedItems();
+        const iframe = document.createElement('iframe');
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
         
-        const container = document.getElementById('previewArea');
+        document.getElementById('previewArea').innerHTML = '';
+        document.getElementById('previewArea').appendChild(iframe);
         
-        if (items.length === 0) {
-            container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#999;">Выберите хотя бы один фразеологизм слева</div>';
-            return;
-        }
-
-        container.innerHTML = getWidgetMarkup(settings, items);
+        // Write content to iframe
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(getInnerHtml(settings, items));
+        doc.close();
     }
 
     function generateCode() {
         const settings = {
             cardColor: document.getElementById('cardColor').value,
             textColor: document.getElementById('textColor').value,
-            bgColor: document.getElementById('bgColor').value
+            bgColor: "transparent" // Для Genially всегда прозрачный фон у iframe
         };
-        const items = getSelectedItems();
+        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
 
-        if (items.length === 0) {
-            alert('Сначала выберите слова!');
-            return;
-        }
+        if(items.length === 0) { alert("Выберите слова!"); return; }
 
-        const widgetCode = getWidgetMarkup(settings, items);
+        // Получаем чистый HTML
+        let htmlContent = getInnerHtml(settings, items);
         
-        const fullCode = `<div style="width: 100%; height: 100%; overflow: visible;">
-${widgetCode}
-</div>`;
+        // Экранируем кавычки для srcdoc
+        let escapedHtml = htmlContent.replace(/"/g, '&quot;');
+
+        // Создаем IFRAME код
+        const iframeCode = `<iframe 
+    srcdoc="${escapedHtml}" 
+    style="width: 100%; height: 600px; border: none; overflow: hidden;"
+    sandbox="allow-scripts allow-same-origin"
+></iframe>`;
 
         const textarea = document.getElementById('resultCode');
-        textarea.value = fullCode;
-        textarea.style.background = "#fff8e1";
+        textarea.value = iframeCode;
+        textarea.style.background = "#e3f2fd";
         setTimeout(() => textarea.style.background = "#fff", 500);
     }
 
-    // Start
     initList();
-
 </script>
 
 </body>
