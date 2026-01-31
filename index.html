@@ -2,90 +2,83 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Карточек v5.4 (Scroll Fix)</title>
+<title>Генератор Карточек v5.3 (Tall Preview)</title>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #fff; padding: 15px; color: #333; margin: 0; height: 100vh; box-sizing: border-box; overflow: hidden; }
+    body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; padding: 20px; color: #333; margin: 0; }
     
-    /* Макет теперь на всю высоту окна Genially */
-    .main-layout { display: flex; gap: 20px; height: 100%; }
+    /* Широкий макет */
+    .main-layout { display: flex; gap: 30px; max-width: 98%; margin: 0 auto; align-items: flex-start; }
     
-    /* Левая панель (узкая) */
     .settings-panel { 
-        background: #f9f9fa; padding: 15px; border-radius: 12px; 
-        border: 1px solid #eee; width: 300px; flex-shrink: 0; 
-        display: flex; flex-direction: column; overflow-y: auto;
+        background: white; padding: 25px; border-radius: 16px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 350px; flex-shrink: 0; 
+        max-height: 95vh; overflow-y: auto; position: sticky; top: 20px;
     }
 
-    /* Правая панель (растягивается) */
-    .preview-panel { 
-        flex-grow: 1; display: flex; flex-direction: column; gap: 10px; height: 100%; 
-        min-width: 0; /* Важно для flexbox */
-    }
+    .preview-panel { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
 
-    h2 { margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
-    label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.85rem; color: #555; }
+    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #666; }
+    input[type="color"] { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
     
-    input[type="color"] { width: 100%; height: 35px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
-    input[type="range"] { width: 100%; margin: 8px 0; }
-    
-    /* Список слов компактный */
-    .word-list { flex-grow: 1; min-height: 150px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; padding: 8px; background: #fff; margin-bottom: 10px; }
-    .check-item { display: flex; align-items: center; padding: 4px 0; border-bottom: 1px solid #f5f5f5; }
-    .check-item label { font-size: 0.85rem; cursor: pointer; width: 100%; margin: 0; display: flex; align-items: center; }
-    .check-item input { margin-right: 8px; }
+    input[type="range"] { width: 100%; margin: 10px 0; }
+    .range-value { font-weight: bold; color: #2196F3; float: right; }
+
+    .word-list { height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 10px; background: #fafafa; margin-bottom: 15px; }
+    .check-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .check-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+    .check-item label { cursor: pointer; width: 100%; margin: 0; }
 
     button.generate-btn {
-        background: #2196F3; color: white; border: none; padding: 12px; 
-        font-size: 14px; border-radius: 8px; cursor: pointer; width: 100%; 
-        font-weight: bold; margin-top: auto; /* Прижать к низу */
+        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        color: white; border: none; padding: 15px; 
+        font-size: 16px; border-radius: 10px; cursor: pointer; width: 100%; 
+        font-weight: bold; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
     }
-    button.generate-btn:hover { background: #1976D2; }
+    button.generate-btn:hover { transform: translateY(-2px); }
 
-    /* ОКНО ПРЕДПРОСМОТРА С ПРОКРУТКОЙ */
+    /* ИЗМЕНЕНИЕ: Высота окна теперь 850px + прокрутка */
     .preview-box {
-        background: #fff; border-radius: 12px; 
-        flex-grow: 1; /* Занимает все свободное место */
-        border: 2px dashed #ccc;
+        background: #fff; border-radius: 16px; padding: 0; 
+        height: 850px; /* Фиксированная большая высота */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 2px dashed #ccc;
+        overflow: hidden; 
         position: relative;
-        overflow: hidden; /* Скрываем внешний скролл */
     }
     
-    /* Iframe внутри будет скроллиться сам */
-    iframe.preview-iframe {
-        width: 100%; height: 100%; border: none;
-    }
-    
-    .code-area { height: 80px; flex-shrink: 0; background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #eee; }
-    textarea { width: 100%; height: 100%; padding: 5px; border-radius: 6px; border: 1px solid #ccc; font-family: monospace; font-size: 11px; resize: none; box-sizing: border-box; }
+    textarea { width: 100%; height: 120px; padding: 15px; border-radius: 12px; border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; }
 </style>
 </head>
 <body>
 
 <div class="main-layout">
     <div class="settings-panel">
-        <h2>🛠 Настройки v5.4</h2>
+        <h2>🛠 Настройки v5.3</h2>
         
-        <label>Масштаб: <span id="scaleVal" style="color:#2196F3">1.0</span></label>
+        <label>Масштаб: <span id="scaleVal" class="range-value">1.0</span></label>
         <input type="range" id="scaleInput" min="0.3" max="1.5" step="0.1" value="1.0" oninput="updatePreview()">
         
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1"><label>Фон:</label><input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()"></div>
-            <div style="flex:1"><label>Текст:</label><input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()"></div>
-        </div>
+        <label>Цвет карточки:</label>
+        <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
         <br>
+        <label>Цвет текста:</label>
+        <input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()">
 
-        <label>Словарь (<a href="#" onclick="toggleAll(true); return false;">Все</a> / <a href="#" onclick="toggleAll(false); return false;">Сброс</a>)</label>
+        <h3 style="margin: 15px 0 5px 0; font-size: 1rem; color: #444; border-bottom: 2px solid #eee;">Словарь</h3>
+        <button onclick="toggleAll(true)" style="margin-bottom:5px; cursor:pointer;">Выбрать все</button>
+        <button onclick="toggleAll(false)" style="margin-bottom:5px; cursor:pointer;">Сбросить</button>
+
         <div class="word-list" id="wordListContainer"></div>
 
-        <button class="generate-btn" onclick="generateCode()">📦 ПОЛУЧИТЬ КОД</button>
+        <button class="generate-btn" onclick="generateCode()">📦 Упаковать код</button>
     </div>
 
     <div class="preview-panel">
-        <label>Предпросмотр (Прокрутите, если не влезает):</label>
+        <label>Предпросмотр результата:</label>
         <div class="preview-box" id="previewArea"></div>
         
-        <div class="code-area">
-            <label style="margin-top:0;">Код для вставки (Insert -> Others):</label>
+        <div style="background: white; padding: 20px; border-radius: 16px;">
+            <h3 style="margin-top:0;">Код для Genially</h3>
             <textarea id="resultCode" readonly onclick="this.select()"></textarea>
         </div>
     </div>
@@ -160,18 +153,13 @@
         <html>
         <head>
         <style>
-            /* Body has auto scroll */
-            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; width: 100vw; overflow-x: hidden; overflow-y: auto; }
-            
+            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; width: 100vw; overflow-x: hidden; }
             .scaler {
-                /* Force width to break lines */
-                width: calc(100vw / ${settings.scale} - 40px); 
+                width: calc(100vw / ${settings.scale} - 30px); 
                 transform: scale(${settings.scale});
                 transform-origin: 0 0;
                 display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;
                 padding: 10px; box-sizing: border-box;
-                /* Add padding bottom to avoid cut-off at very bottom */
-                padding-bottom: 100px;
             }
             .flip-card { background-color: transparent; width: 180px; height: 120px; perspective: 1000px; cursor: pointer; margin-bottom: 10px; }
             .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-radius: 12px; }
@@ -189,3 +177,67 @@
                     <div class="flip-card" onclick="this.classList.toggle('flipped')">
                         <div class="flip-card-inner">
                             <div class="flip-card-front"><p>${item.phrase}</p></div>
+                            <div class="flip-card-back"><p>${item.def}</p></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </body>
+        </html>`;
+    }
+
+    function updatePreview() {
+        const settings = {
+            cardColor: document.getElementById('cardColor').value,
+            textColor: document.getElementById('textColor').value,
+            scale: document.getElementById('scaleInput').value
+        };
+        document.getElementById('scaleVal').innerText = settings.scale;
+
+        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
+        
+        const iframe = document.createElement('iframe');
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        iframe.style.background = "#fcfcfc";
+        
+        document.getElementById('previewArea').innerHTML = '';
+        document.getElementById('previewArea').appendChild(iframe);
+        
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(getInnerHtml(settings, items));
+        doc.close();
+    }
+
+    function generateCode() {
+        const settings = {
+            cardColor: document.getElementById('cardColor').value,
+            textColor: document.getElementById('textColor').value,
+            scale: document.getElementById('scaleInput').value
+        };
+        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
+
+        if(items.length === 0) { alert("Выберите слова!"); return; }
+
+        let htmlContent = getInnerHtml(settings, items);
+        let escapedHtml = htmlContent.replace(/"/g, '&quot;');
+
+        const iframeCode = `<iframe 
+    srcdoc="${escapedHtml}" 
+    style="width: 100%; height: 100%; border: none; overflow: visible; background: transparent;"
+    sandbox="allow-scripts allow-same-origin"
+></iframe>`;
+
+        const textarea = document.getElementById('resultCode');
+        textarea.value = iframeCode;
+        textarea.style.background = "#e3f2fd";
+        setTimeout(() => textarea.style.background = "#fff", 500);
+    }
+
+    initList();
+</script>
+
+</body>
+</html>
