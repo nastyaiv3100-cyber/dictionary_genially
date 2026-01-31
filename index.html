@@ -2,35 +2,39 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Словаря (Исправленный)</title>
+<title>Генератор Словаря v3 (Стильный)</title>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f8; padding: 20px; color: #333; }
-    .container { display: flex; gap: 20px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; }
-    .editor, .output { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); flex: 1; min-width: 300px; }
-    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; margin-bottom: 15px; }
+    body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: #eef2f5; padding: 20px; color: #333; }
+    .container { display: flex; gap: 30px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+    .panel { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); flex: 1; min-width: 320px; }
     
-    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
-    input[type="color"] { width: 100%; height: 45px; border: 2px solid #ddd; border-radius: 8px; padding: 2px; cursor: pointer; }
-    
-    button {
-        background: #2196F3; color: white; border: none; padding: 14px 20px; 
-        font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px;
-        font-weight: bold; transition: background 0.2s;
-    }
-    button:hover { background: #1976D2; }
-    
-    textarea { width: 100%; height: 250px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.4; resize: vertical; background: #fafafa; }
+    h2 { margin-top: 0; color: #2c3e50; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .badge { background: #FF9800; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.6em; vertical-align: middle; }
 
-    /* Preview Box Styles */
+    label { display: block; margin-bottom: 10px; font-weight: 600; color: #555; }
+    input[type="color"] { width: 100%; height: 50px; border: none; border-radius: 12px; cursor: pointer; background: none; padding: 0; }
+    
+    button.primary-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white; border: none; padding: 15px 25px; 
+        font-size: 16px; border-radius: 12px; cursor: pointer; width: 100%; margin-top: 25px;
+        font-weight: bold; transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+    }
+    button.primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4); }
+    
+    textarea { width: 100%; height: 200px; margin-top: 15px; border: 2px solid #eee; border-radius: 12px; padding: 15px; font-family: 'Consolas', monospace; font-size: 13px; resize: vertical; background: #fafafa; color: #555; }
+    textarea:focus { outline: none; border-color: #764ba2; }
+
+    /* Preview Area Styling */
     #preview-wrapper {
-        border: 2px dashed #ccc;
-        padding: 30px;
-        background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), 
-                          linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0);
+        border: 2px dashed #dbe2e8;
+        padding: 40px;
+        background-color: #f8f9fa;
+        background-image: radial-gradient(#cbd5e0 1px, transparent 1px);
         background-size: 20px 20px;
-        background-position: 0 0, 10px 10px;
-        border-radius: 8px;
-        min-height: 250px;
+        border-radius: 16px;
+        min-height: 300px;
         display: flex; align-items: flex-start; justify-content: center;
     }
 </style>
@@ -38,30 +42,29 @@
 <body>
 
 <div class="container">
-    <div class="editor">
-        <h2>1. Настройка и Тест</h2>
-        <p style="font-size: 0.9em; color: #666;">Попробуйте ввести "нос" или "бить" в поле ниже.</p>
+    <div class="panel">
+        <h2>1. Дизайн <span class="badge">v3.0</span></h2>
+        <p style="color: #666; margin-bottom: 20px;">Выберите основной цвет. Виджет автоматически подстроит тени и акценты.</p>
         
-        <label>Цвет оформления:</label>
-        <input type="color" id="accentColor" value="#FF9800" oninput="renderPreview()">
+        <label>Основной цвет (акцент):</label>
+        <input type="color" id="accentColor" value="#6C63FF" oninput="renderPreview()">
         
         <br><br>
-        <label>Предпросмотр (Живой тест):</label>
-        <div id="preview-wrapper">
-            </div>
+        <label>Живой предпросмотр (введите "нос"):</label>
+        <div id="preview-wrapper"></div>
 
-        <button onclick="generateCode()">2. Сгенерировать код</button>
+        <button class="primary-btn" onclick="generateCode()">✨ Сгенерировать красивый код</button>
     </div>
 
-    <div class="output">
-        <h2>3. Код для Genially</h2>
-        <p style="font-size: 0.9em; color: #666;">Нажмите кнопку слева, затем скопируйте этот код и вставьте в Genially через <b>Insert → Others</b>.</p>
+    <div class="panel">
+        <h2>2. Код для Genially</h2>
+        <p style="color: #666;">Скопируйте код ниже и вставьте через <b>Insert → Others</b>.</p>
         <textarea id="resultCode" readonly onclick="this.select()"></textarea>
     </div>
 </div>
 
 <script>
-    // База данных фразеологизмов
+    // База данных (та же самая)
     const dictionaryDB = {
         "баклуши бить": "Бездельничать, заниматься пустяками.",
         "без году неделя": "Совсем недавно, очень короткое время.",
@@ -109,144 +112,238 @@
         "язык проглотить": "Замолчать."
     };
 
-    // Функция, создающая HTML структуру виджета
     function getWidgetMarkup(color, uniqueId) {
+        // SVG Icon definition
+        const searchIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+
         return `
-        <div id="wrapper_${uniqueId}" style="width: 100%; max-width: 500px; margin: 0 auto; font-family: 'Arial', sans-serif;">
+        <div id="app_${uniqueId}" class="widget-wrapper">
             <style>
-                #wrapper_${uniqueId} * { box-sizing: border-box; }
-                #wrapper_${uniqueId} .search-box { position: relative; width: 100%; }
-                #wrapper_${uniqueId} input {
-                    width: 100%; padding: 12px 20px; border: 2px solid ${color}; border-radius: 30px;
-                    font-size: 16px; outline: none; background: rgba(255, 255, 255, 0.95);
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                /* Scoped Styles */
+                #app_${uniqueId}.widget-wrapper {
+                    font-family: 'Segoe UI', sans-serif;
+                    width: 100%;
+                    max-width: 550px;
+                    margin: 0 auto;
                 }
-                #wrapper_${uniqueId} .suggestions {
-                    position: absolute; top: 100%; left: 10px; right: 10px; margin-top: 5px;
-                    background: white; border-radius: 10px;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                    z-index: 9999; max-height: 200px; overflow-y: auto; display: none;
-                    border: 1px solid #eee;
+                
+                #app_${uniqueId} .search-container {
+                    position: relative;
+                    width: 100%;
+                    background: white;
+                    border-radius: 50px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                    display: flex;
+                    align-items: center;
+                    padding: 5px 20px;
+                    transition: box-shadow 0.3s ease;
+                    border: 2px solid transparent;
                 }
-                #wrapper_${uniqueId} .suggestion-item {
-                    padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #444;
+                
+                #app_${uniqueId} .search-container:focus-within {
+                    box-shadow: 0 6px 20px rgba(${parseInt(color.slice(1,3),16)}, ${parseInt(color.slice(3,5),16)}, ${parseInt(color.slice(5,7),16)}, 0.25);
+                    border-color: ${color};
                 }
-                #wrapper_${uniqueId} .suggestion-item:hover { background: #f9f9f9; color: ${color}; font-weight: bold; }
-                #wrapper_${uniqueId} .result-card {
-                    margin-top: 15px; padding: 20px; background: rgba(255, 255, 255, 0.95);
-                    border-left: 6px solid ${color}; border-radius: 8px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;
+
+                #app_${uniqueId} .icon-box {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 10px;
                 }
-                #wrapper_${uniqueId} .phrase-title { font-weight: bold; font-size: 1.1em; color: ${color}; margin-bottom: 8px; text-transform: uppercase; }
-                #wrapper_${uniqueId} .phrase-desc { color: #333; line-height: 1.5; font-size: 1em; }
+
+                #app_${uniqueId} input {
+                    border: none;
+                    background: transparent;
+                    width: 100%;
+                    padding: 10px 0;
+                    font-size: 16px;
+                    color: #333;
+                    outline: none;
+                    font-weight: 500;
+                }
+                
+                #app_${uniqueId} input::placeholder { color: #aaa; }
+
+                /* Suggestions Dropdown */
+                #app_${uniqueId} .suggestions-list {
+                    position: absolute;
+                    top: 110%; /* Just below input */
+                    left: 15px;
+                    right: 15px;
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                    overflow: hidden;
+                    display: none;
+                    z-index: 100;
+                    opacity: 0;
+                    transform: translateY(-10px);
+                    transition: opacity 0.2s, transform 0.2s;
+                }
+                
+                #app_${uniqueId} .suggestions-list.active {
+                    display: block;
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                #app_${uniqueId} .sug-item {
+                    padding: 12px 20px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f5f5f5;
+                    transition: background 0.1s;
+                    font-size: 15px;
+                }
+                
+                #app_${uniqueId} .sug-item:last-child { border-bottom: none; }
+                #app_${uniqueId} .sug-item:hover { background: #f8f9fa; color: ${color}; font-weight: 600; }
+
+                /* Result Card with Animation */
+                #app_${uniqueId} .result-box {
+                    margin-top: 20px;
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(10px); /* Glass effect */
+                    border-radius: 20px;
+                    padding: 25px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                    display: none;
+                    border-left: 8px solid ${color};
+                    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+
+                #app_${uniqueId} .result-title {
+                    font-size: 1.4em;
+                    font-weight: 800;
+                    color: ${color};
+                    margin-bottom: 10px;
+                    line-height: 1.2;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                #app_${uniqueId} .result-text {
+                    font-size: 1.1em;
+                    color: #444;
+                    line-height: 1.6;
+                }
             </style>
-            <div class="search-box">
-                <input type="text" id="inp_${uniqueId}" placeholder="Найти фразеологизм..." autocomplete="off">
-                <div class="suggestions" id="sug_${uniqueId}"></div>
+
+            <div class="search-container">
+                <div class="icon-box">${searchIcon}</div>
+                <input type="text" id="inp_${uniqueId}" placeholder="Поиск фразеологизма..." autocomplete="off">
             </div>
-            <div id="res_${uniqueId}" class="result-card">
-                <div class="phrase-title" id="title_${uniqueId}"></div>
-                <div class="phrase-desc" id="desc_${uniqueId}"></div>
+
+            <div id="sug_${uniqueId}" class="suggestions-list"></div>
+
+            <div id="res_${uniqueId}" class="result-box">
+                <div id="title_${uniqueId}" class="result-title"></div>
+                <div id="desc_${uniqueId}" class="result-text"></div>
             </div>
-        </div>`;
+        </div>
+        `;
     }
 
-    // Логика виджета (скрипт)
     function getWidgetScript(uniqueId, dbData) {
         return `
         (function(){
             var db = ${JSON.stringify(dbData)};
             var input = document.getElementById('inp_${uniqueId}');
-            var sugBox = document.getElementById('sug_${uniqueId}');
-            var resCard = document.getElementById('res_${uniqueId}');
-            var titleDiv = document.getElementById('title_${uniqueId}');
-            var descDiv = document.getElementById('desc_${uniqueId}');
+            var sugList = document.getElementById('sug_${uniqueId}');
+            var resBox = document.getElementById('res_${uniqueId}');
+            var title = document.getElementById('title_${uniqueId}');
+            var desc = document.getElementById('desc_${uniqueId}');
 
             if(!input) return;
 
             input.addEventListener('input', function() {
                 var val = this.value.toLowerCase().trim();
-                sugBox.innerHTML = '';
+                sugList.innerHTML = '';
+                
                 if (!val) {
-                    sugBox.style.display = 'none';
-                    resCard.style.display = 'none';
+                    sugList.classList.remove('active');
+                    // Optional: hide result when clearing input? 
+                    // resBox.style.display = 'none'; 
                     return;
                 }
+
                 var matches = Object.keys(db).filter(function(k){ return k.indexOf(val) !== -1; });
                 
                 if (matches.length > 0) {
-                    sugBox.style.display = 'block';
                     matches.forEach(function(match) {
                         var div = document.createElement('div');
-                        div.className = 'suggestion-item';
+                        div.className = 'sug-item';
                         div.innerText = match;
                         div.onclick = function() {
-                            input.value = match;
-                            sugBox.style.display = 'none';
-                            titleDiv.innerText = match;
-                            descDiv.innerText = db[match];
-                            resCard.style.display = 'block';
+                            selectPhrase(match);
                         };
-                        sugBox.appendChild(div);
+                        sugList.appendChild(div);
                     });
+                    sugList.classList.add('active');
                 } else {
-                    sugBox.style.display = 'none';
+                    sugList.classList.remove('active');
                 }
             });
 
-            // Скрыть при клике вне
+            function selectPhrase(phrase) {
+                input.value = phrase;
+                sugList.classList.remove('active');
+                
+                // Content update
+                title.innerText = phrase;
+                desc.innerText = db[phrase];
+                
+                // Animation reset trigger
+                resBox.style.display = 'none';
+                resBox.offsetHeight; /* trigger reflow */
+                resBox.style.display = 'block';
+            }
+
+            // Close suggestions on click outside
             document.addEventListener('click', function(e) {
-                if (e.target !== input) sugBox.style.display = 'none';
+                if (!input.contains(e.target) && !sugList.contains(e.target)) {
+                    sugList.classList.remove('active');
+                }
             });
         })();`;
     }
 
-    // 1. Функция для живого предпросмотра (запускает скрипт вручную)
     function renderPreview() {
         const color = document.getElementById('accentColor').value;
         const container = document.getElementById('preview-wrapper');
-        const uniqueId = 'preview_mode';
+        const uniqueId = 'preview_v3';
         
-        // Вставляем HTML
         container.innerHTML = getWidgetMarkup(color, uniqueId);
         
-        // ВРУЧНУЮ запускаем логику для предпросмотра
-        // Мы используем eval здесь, чтобы код заработал "на лету" в браузере пользователя без перезагрузки
-        // В Genially eval не нужен, там скрипт сработает сам.
         const scriptContent = getWidgetScript(uniqueId, dictionaryDB);
-        // Убираем обертку тега <script> если она есть, eval выполняет чистый JS
-        const cleanScript = scriptContent.replace(/<\/?script>/g, '');
         try {
-            eval(cleanScript); 
-        } catch(e) {
-            console.error("Ошибка предпросмотра:", e);
-        }
+            eval(scriptContent.replace(/<\/?script>/g, '')); 
+        } catch(e) { console.error(e); }
     }
 
-    // 2. Функция генерации кода для копирования
     function generateCode() {
         const color = document.getElementById('accentColor').value;
-        // Генерируем случайный ID, чтобы можно было вставить несколько виджетов на одну страницу
-        const uniqueId = 'gen_' + Math.floor(Math.random() * 10000);
+        const uniqueId = 'dict_' + Math.floor(Math.random() * 9000);
         
         const html = getWidgetMarkup(color, uniqueId);
         const script = getWidgetScript(uniqueId, dictionaryDB);
         
-        const fullCode = `<div style="width: 100%; height: 100%; background: transparent;">
+        const fullCode = `<div style="width: 100%; height: 100%; background: transparent; overflow: visible;">
 ${html}
 <script>${script}<\/script>
-</div>
-`;
+</div>`;
 
         const textarea = document.getElementById('resultCode');
         textarea.value = fullCode;
-        
-        // Эффект мигания для подтверждения
-        textarea.style.background = "#e8f5e9";
-        setTimeout(() => textarea.style.background = "#fafafa", 300);
+        textarea.style.background = "#e0f2f1"; // Success highlight
+        setTimeout(() => textarea.style.background = "#fafafa", 400);
     }
 
-    // Запуск при загрузке
     renderPreview();
 </script>
 
