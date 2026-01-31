@@ -2,27 +2,35 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Генератор Карточек (Genially Safe Mode)</title>
+<title>Генератор Карточек v5.1 (Wide)</title>
 <style>
     body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; padding: 20px; color: #333; margin: 0; }
-    .main-layout { display: flex; gap: 30px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+    
+    /* ИЗМЕНЕНИЕ 1: Увеличил ширину макета до 98% экрана */
+    .main-layout { display: flex; gap: 30px; max-width: 98%; margin: 0 auto; align-items: flex-start; }
     
     .settings-panel { 
         background: white; padding: 25px; border-radius: 16px; 
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 350px; flex-shrink: 0; 
-        max-height: 90vh; overflow-y: auto; position: sticky; top: 20px;
+        max-height: 95vh; overflow-y: auto; position: sticky; top: 20px;
     }
 
     .preview-panel { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
 
     h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
+    h3 { margin: 15px 0 5px 0; font-size: 1rem; color: #444; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+    
     label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #666; }
     input[type="color"] { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
     
-    .word-list { height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 10px; background: #fafafa; margin-bottom: 15px; }
+    input[type="range"] { width: 100%; margin: 10px 0; }
+    .range-value { font-weight: bold; color: #2196F3; float: right; }
+
+    .word-list { height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 10px; background: #fafafa; margin-bottom: 15px; }
     .check-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-    .check-item input { margin-right: 10px; transform: scale(1.2); }
-    
+    .check-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+    .check-item label { cursor: pointer; width: 100%; margin: 0; }
+
     button.generate-btn {
         background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
         color: white; border: none; padding: 15px; 
@@ -31,32 +39,39 @@
     }
     button.generate-btn:hover { transform: translateY(-2px); }
 
+    /* ИЗМЕНЕНИЕ 2: Увеличил высоту окна предпросмотра */
     .preview-box {
-        background: #fff; border-radius: 16px; padding: 20px; min-height: 400px;
+        background: #fff; border-radius: 16px; padding: 0; 
+        min-height: 700px; /* Было 500px, стало 700px */
         box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 2px dashed #ccc;
+        overflow: hidden; 
+        position: relative;
     }
     
-    textarea { width: 100%; height: 150px; padding: 15px; border-radius: 12px; border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; }
+    textarea { width: 100%; height: 120px; padding: 15px; border-radius: 12px; border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; }
 </style>
 </head>
 <body>
 
 <div class="main-layout">
     <div class="settings-panel">
-        <h2>🛠 Настройки v4.0</h2>
+        <h2>🛠 Настройки v5.1</h2>
         
+        <h3>1. Размер (Масштаб)</h3>
+        <label>Уменьшить/Увеличить: <span id="scaleVal" class="range-value">1.0</span></label>
+        <input type="range" id="scaleInput" min="0.3" max="1.5" step="0.1" value="1.0" oninput="updatePreview()">
+        <p style="font-size:0.8em; color:#888; margin-top:-5px;">Если в Genially слишком крупно, поставьте 0.6 или 0.7</p>
+
+        <h3>2. Цвета</h3>
         <label>Цвет карточки:</label>
         <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
         <br>
         <label>Цвет текста:</label>
         <input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()">
-        <br>
-        <label>Фон (для теста):</label>
-        <input type="color" id="bgColor" value="#fcfcfc" oninput="updatePreview()">
 
-        <h3 style="margin-bottom: 5px;">Словарь</h3>
-        <button onclick="toggleAll(true)" style="margin-bottom:10px; cursor:pointer;">Выбрать все</button>
-        <button onclick="toggleAll(false)" style="margin-bottom:10px; cursor:pointer;">Сбросить</button>
+        <h3>3. Словарь</h3>
+        <button onclick="toggleAll(true)" style="margin-bottom:5px; cursor:pointer;">Выбрать все</button>
+        <button onclick="toggleAll(false)" style="margin-bottom:5px; cursor:pointer;">Сбросить</button>
 
         <div class="word-list" id="wordListContainer"></div>
 
@@ -64,11 +79,12 @@
     </div>
 
     <div class="preview-panel">
+        <label>Предпросмотр результата:</label>
         <div class="preview-box" id="previewArea"></div>
         
         <div style="background: white; padding: 20px; border-radius: 16px;">
-            <h3 style="margin-top:0;">Код для Genially (Iframe версия)</h3>
-            <p style="font-size: 0.8em; color: #666;">Этот код работает как отдельное окно. Genially примет его без проблем.</p>
+            <h3 style="margin-top:0;">Готовый код для Genially</h3>
+            <p style="font-size: 0.8em; color: #666;">Скопируйте всё из поля ниже и вставьте в Insert -> Others.</p>
             <textarea id="resultCode" readonly onclick="this.select()"></textarea>
         </div>
     </div>
@@ -127,7 +143,7 @@
         Object.keys(dictionaryDB).sort().forEach((key, i) => {
             const div = document.createElement('div');
             div.className = 'check-item';
-            div.innerHTML = `<label style="width:100%; cursor:pointer;"><input type="checkbox" value="${key}" ${i<6?'checked':''} onchange="updatePreview()"> ${key}</label>`;
+            div.innerHTML = `<label><input type="checkbox" value="${key}" ${i<6?'checked':''} onchange="updatePreview()"> ${key}</label>`;
             container.appendChild(div);
         });
         updatePreview();
@@ -138,33 +154,51 @@
         updatePreview();
     }
 
-    // --- ВНУТРЕННИЙ ШАБЛОН (ТО, ЧТО БУДЕТ ВНУТРИ IFRAME) ---
+    // --- HTML CONTENT GENERATOR ---
     function getInnerHtml(settings, items) {
         return `
         <!DOCTYPE html>
         <html>
         <head>
         <style>
-            body { margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; background-color: ${settings.bgColor}; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-            .flip-card { background-color: transparent; width: 180px; height: 120px; perspective: 1000px; cursor: pointer; }
-            .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 12px; }
+            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; overflow: hidden; }
+            
+            /* Main Scale Container */
+            .scaler {
+                transform: scale(${settings.scale});
+                transform-origin: top left;
+                width: ${100 / settings.scale}%; /* Компенсация ширины */
+                display: flex; 
+                flex-wrap: wrap; 
+                gap: 15px; 
+                justify-content: center;
+                padding: 10px;
+                box-sizing: border-box;
+            }
+
+            .flip-card { background-color: transparent; width: 180px; height: 120px; perspective: 1000px; cursor: pointer; margin-bottom: 10px; }
+            .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-radius: 12px; }
             .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
             .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; }
+            
             .flip-card-front { background-color: ${settings.cardColor}; color: ${settings.textColor}; }
             .flip-card-front p { font-size: 1.1em; font-weight: bold; margin: 0; text-transform: uppercase; }
+            
             .flip-card-back { background-color: white; color: #333; transform: rotateY(180deg); border: 3px solid ${settings.cardColor}; }
             .flip-card-back p { font-size: 0.9em; margin: 0; line-height: 1.3; }
         </style>
         </head>
         <body>
-            ${items.map(item => `
-                <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front"><p>${item.phrase}</p></div>
-                        <div class="flip-card-back"><p>${item.def}</p></div>
+            <div class="scaler">
+                ${items.map(item => `
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front"><p>${item.phrase}</p></div>
+                            <div class="flip-card-back"><p>${item.def}</p></div>
+                        </div>
                     </div>
-                </div>
-            `).join('')}
+                `).join('')}
+            </div>
         </body>
         </html>`;
     }
@@ -173,19 +207,23 @@
         const settings = {
             cardColor: document.getElementById('cardColor').value,
             textColor: document.getElementById('textColor').value,
-            bgColor: document.getElementById('bgColor').value
+            scale: document.getElementById('scaleInput').value
         };
+        
+        // Update label text
+        document.getElementById('scaleVal').innerText = settings.scale;
+
         const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
         
         const iframe = document.createElement('iframe');
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         iframe.style.border = "none";
+        iframe.style.background = "#fcfcfc"; // Background only for preview
         
         document.getElementById('previewArea').innerHTML = '';
         document.getElementById('previewArea').appendChild(iframe);
         
-        // Write content to iframe
         const doc = iframe.contentWindow.document;
         doc.open();
         doc.write(getInnerHtml(settings, items));
@@ -196,22 +234,18 @@
         const settings = {
             cardColor: document.getElementById('cardColor').value,
             textColor: document.getElementById('textColor').value,
-            bgColor: "transparent" // Для Genially всегда прозрачный фон у iframe
+            scale: document.getElementById('scaleInput').value
         };
         const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
 
         if(items.length === 0) { alert("Выберите слова!"); return; }
 
-        // Получаем чистый HTML
         let htmlContent = getInnerHtml(settings, items);
-        
-        // Экранируем кавычки для srcdoc
         let escapedHtml = htmlContent.replace(/"/g, '&quot;');
 
-        // Создаем IFRAME код
         const iframeCode = `<iframe 
     srcdoc="${escapedHtml}" 
-    style="width: 100%; height: 600px; border: none; overflow: hidden;"
+    style="width: 100%; height: 100%; border: none; overflow: visible; background: transparent;"
     sandbox="allow-scripts allow-same-origin"
 ></iframe>`;
 
