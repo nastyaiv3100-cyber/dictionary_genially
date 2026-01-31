@@ -1,244 +1,754 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Словарь Фразеологизмов</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Генератор Карточек v5.3 — Beautiful UI</title>
+
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #eef2f5; padding: 20px; color: #333; margin: 0; }
-    
-    /* Широкий макет */
-    .main-layout { display: flex; gap: 30px; max-width: 98%; margin: 0 auto; align-items: flex-start; }
-    
-    .settings-panel { 
-        background: white; padding: 25px; border-radius: 16px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 350px; flex-shrink: 0; 
-        max-height: 95vh; overflow-y: auto; position: sticky; top: 20px;
-    }
+  :root{
+    --bg0:#0b1220;
+    --bg1:#0f172a;
+    --card:#ffffff;
+    --muted:#94a3b8;
+    --text:#0f172a;
+    --stroke:rgba(148,163,184,.22);
+    --shadow: 0 18px 40px rgba(2, 6, 23, .25);
+    --shadow2: 0 10px 25px rgba(2, 6, 23, .14);
+    --radius:18px;
+    --radius2:14px;
+    --accent:#3b82f6;
+    --accent2:#06b6d4;
+    --good:#22c55e;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+  }
 
-    .preview-panel { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    color: rgba(255,255,255,.92);
+    background:
+      radial-gradient(1000px 700px at 10% -10%, rgba(59,130,246,.35), transparent 55%),
+      radial-gradient(900px 700px at 90% 0%, rgba(6,182,212,.28), transparent 55%),
+      radial-gradient(1100px 900px at 50% 110%, rgba(168,85,247,.18), transparent 60%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    padding: 22px;
+  }
 
-    h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
-    label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #666; }
-    input[type="color"] { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; padding: 0; background: none; }
-    
-    input[type="range"] { width: 100%; margin: 10px 0; }
-    .range-value { font-weight: bold; color: #2196F3; float: right; }
+  /* Header */
+  .topbar{
+    max-width: 1180px;
+    margin: 0 auto 18px auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 14px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+  }
+  .logo{
+    width:42px; height:42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(59,130,246,.95), rgba(6,182,212,.9));
+    box-shadow: 0 10px 30px rgba(59,130,246,.25);
+    display:grid; place-items:center;
+    font-weight: 900;
+    letter-spacing: .5px;
+  }
+  .brand h1{
+    margin:0;
+    font-size: 16px;
+    line-height: 1.1;
+  }
+  .brand p{
+    margin:2px 0 0 0;
+    color: rgba(148,163,184,.95);
+    font-size: 12px;
+  }
+  .pill{
+    display:flex; align-items:center; gap:8px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    backdrop-filter: blur(10px);
+    color: rgba(255,255,255,.9);
+    font-size: 12px;
+    white-space: nowrap;
+  }
 
-    .word-list { height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 10px; background: #fafafa; margin-bottom: 15px; }
-    .check-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-    .check-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
-    .check-item label { cursor: pointer; width: 100%; margin: 0; }
+  /* Layout */
+  .main-layout{
+    max-width: 1180px;
+    margin: 0 auto;
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    gap: 18px;
+    align-items:start;
+  }
 
-    button.generate-btn {
-        background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-        color: white; border: none; padding: 15px; 
-        font-size: 16px; border-radius: 10px; cursor: pointer; width: 100%; 
-        font-weight: bold; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-    }
-    button.generate-btn:hover { transform: translateY(-2px); }
+  @media (max-width: 980px){
+    .main-layout{ grid-template-columns: 1fr; }
+    .settings-panel{ position: relative !important; top:auto !important; max-height: none !important; }
+  }
 
-    /* ИЗМЕНЕНИЕ: Высота окна теперь 850px + прокрутка */
-    .preview-box {
-        background: #fff; border-radius: 16px; padding: 0; 
-        height: 850px; /* Фиксированная большая высота */
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 2px dashed #ccc;
-        overflow: hidden; 
-        position: relative;
-    }
-    
-    textarea { width: 100%; height: 120px; padding: 15px; border-radius: 12px; border: 2px solid #eee; font-family: monospace; font-size: 12px; resize: vertical; }
+  /* Panels */
+  .panel{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow2);
+    backdrop-filter: blur(14px);
+    overflow:hidden;
+  }
+
+  .panel-inner{
+    padding: 18px;
+  }
+
+  .settings-panel{
+    position: sticky;
+    top: 18px;
+    max-height: calc(100vh - 36px);
+    overflow:auto;
+  }
+
+  /* nice scrollbar */
+  .settings-panel::-webkit-scrollbar{ width: 10px; }
+  .settings-panel::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.14);
+    border-radius: 999px;
+    border: 2px solid rgba(15,23,42,.7);
+  }
+  .settings-panel::-webkit-scrollbar-track{ background: transparent; }
+
+  /* Headings */
+  h2{
+    margin: 0 0 14px 0;
+    font-size: 15px;
+    letter-spacing: .2px;
+  }
+  .subhead{
+    margin: 14px 0 10px 0;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.10);
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .subhead h3{
+    margin:0;
+    font-size: 13px;
+    color: rgba(255,255,255,.92);
+  }
+  .subhead small{
+    color: rgba(148,163,184,.95);
+    font-size: 11px;
+  }
+
+  /* Form */
+  label{
+    display:flex;
+    justify-content:space-between;
+    gap: 10px;
+    font-weight: 650;
+    font-size: 12px;
+    color: rgba(255,255,255,.86);
+    margin: 12px 0 8px 0;
+  }
+  .hint{
+    color: rgba(148,163,184,.95);
+    font-weight: 600;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .range-value{
+    color: rgba(255,255,255,.92);
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(59,130,246,.22);
+    border: 1px solid rgba(59,130,246,.28);
+    align-self:flex-start;
+  }
+
+  input[type="range"]{
+    width:100%;
+    accent-color: var(--accent);
+    margin: 6px 0 0 0;
+  }
+
+  .color-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .color-field{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius2);
+    padding: 10px;
+  }
+  .color-field .title{
+    font-size: 11px;
+    color: rgba(148,163,184,.95);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  input[type="color"]{
+    width: 100%;
+    height: 42px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 12px;
+    cursor:pointer;
+    padding: 0;
+    background: rgba(255,255,255,.04);
+  }
+
+  /* Buttons */
+  .btn-row{
+    display:flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  button{
+    border: none;
+    cursor: pointer;
+    font-weight: 800;
+    border-radius: 14px;
+    padding: 11px 12px;
+    transition: transform .12s ease, filter .12s ease, background .12s ease;
+    user-select: none;
+  }
+  button:active{ transform: translateY(1px) scale(.99); }
+
+  .btn-ghost{
+    flex:1;
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.92);
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .btn-ghost:hover{ filter: brightness(1.08); }
+
+  .generate-btn{
+    width:100%;
+    margin-top: 14px;
+    padding: 14px 14px;
+    font-size: 14px;
+    color: #06111f;
+    background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 70%, #34d399 120%);
+    box-shadow: 0 16px 30px rgba(34,211,238,.18), 0 10px 22px rgba(96,165,250,.18);
+  }
+  .generate-btn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+
+  /* Dictionary list */
+  .word-list{
+    height: 380px;
+    overflow:auto;
+    border-radius: var(--radius2);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(2,6,23,.26);
+    padding: 8px;
+    margin-top: 10px;
+  }
+
+  .word-list::-webkit-scrollbar{ width: 10px; }
+  .word-list::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.14);
+    border-radius: 999px;
+    border: 2px solid rgba(2,6,23,.35);
+  }
+
+  .check-item{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: background .12s ease, border-color .12s ease;
+  }
+  .check-item:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.10);
+  }
+
+  .check-item input{
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent2);
+    cursor:pointer;
+  }
+  .check-item label{
+    margin:0;
+    font-weight: 750;
+    font-size: 12px;
+    color: rgba(255,255,255,.92);
+    cursor:pointer;
+    display:block;
+    width:100%;
+  }
+
+  /* Right column */
+  .preview-panel{
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+  }
+
+  .section-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+  }
+  .section-title .t{
+    font-weight: 900;
+    font-size: 13px;
+  }
+  .section-title .meta{
+    color: rgba(148,163,184,.95);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .preview-box{
+    height: 850px; /* механика и размеры сохранены */
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .preview-box::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(700px 400px at 20% 0%, rgba(96,165,250,.20), transparent 55%),
+      radial-gradient(700px 500px at 90% 20%, rgba(34,211,238,.14), transparent 55%);
+    pointer-events:none;
+  }
+  #previewArea{
+    position:absolute; inset:0;
+  }
+
+  .code-panel textarea{
+    width:100%;
+    height: 150px;
+    padding: 14px;
+    border-radius: var(--radius2);
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(2,6,23,.35);
+    color: rgba(255,255,255,.92);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    resize: vertical;
+    outline: none;
+  }
+  .code-panel textarea:focus{
+    border-color: rgba(34,211,238,.35);
+    box-shadow: 0 0 0 4px rgba(34,211,238,.10);
+  }
+
+  .note{
+    margin-top: 10px;
+    font-size: 11px;
+    color: rgba(148,163,184,.95);
+    line-height: 1.35;
+  }
+
+  .kpi{
+    display:flex; gap:10px; flex-wrap:wrap;
+    margin-top: 10px;
+  }
+  .kpi .chip{
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,.92);
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+  }
 </style>
 </head>
+
 <body>
 
-<div class="main-layout">
-    <div class="settings-panel">
-        <h2>Конструктор Словаря</h2>
-        
-        <label>Масштаб: <span id="scaleVal" class="range-value">1.0</span></label>
-        <input type="range" id="scaleInput" min="0.3" max="1.5" step="0.1" value="1.0" oninput="updatePreview()">
-        
-        <label>Цвет карточки:</label>
-        <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
-        <br>
-        <label>Цвет текста:</label>
-        <input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">⚡</div>
+      <div>
+        <h1>Генератор карточек (flip) — v5.3</h1>
+        <p>Красивый UI, та же механика: выбор фраз → предпросмотр → iframe для Genially</p>
+      </div>
+    </div>
+    <div class="pill">📌 Подсказка: клик по карточке = переворот</div>
+  </div>
 
-        <h3 style="margin: 15px 0 5px 0; font-size: 1rem; color: #444; border-bottom: 2px solid #eee;">Словарь</h3>
-        <button onclick="toggleAll(true)" style="margin-bottom:5px; cursor:pointer;">Выбрать все</button>
-        <button onclick="toggleAll(false)" style="margin-bottom:5px; cursor:pointer;">Сбросить</button>
+  <div class="main-layout">
+    <!-- LEFT -->
+    <div class="panel settings-panel">
+      <div class="panel-inner">
+        <h2>🛠 Настройки</h2>
+
+        <label>
+          Масштаб
+          <span id="scaleVal" class="range-value">1.0</span>
+        </label>
+        <input type="range" id="scaleInput" min="0.3" max="1.5" step="0.1" value="1.0" oninput="updatePreview()">
+        <div class="hint">Меняет визуальный размер карточек в Genially через transform: scale()</div>
+
+        <div class="color-row">
+          <div class="color-field">
+            <div class="title">Цвет карточки</div>
+            <input type="color" id="cardColor" value="#FF9800" oninput="updatePreview()">
+          </div>
+          <div class="color-field">
+            <div class="title">Цвет текста</div>
+            <input type="color" id="textColor" value="#FFFFFF" oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="subhead">
+          <div>
+            <h3>Словарь</h3>
+            <small>отметь нужные фразы</small>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="toggleAll(true)">Выбрать все</button>
+          <button class="btn-ghost" onclick="toggleAll(false)">Сбросить</button>
+        </div>
 
         <div class="word-list" id="wordListContainer"></div>
 
-        <button class="generate-btn" onclick="generateCode()">📦 Упаковать код</button>
+        <button class="generate-btn" onclick="generateCode()">📦 Упаковать код для Genially</button>
+
+        <div class="kpi">
+          <div class="chip">Без внешних библиотек</div>
+          <div class="chip">srcdoc + sandbox</div>
+          <div class="chip">Live preview</div>
+        </div>
+
+        <div class="note">
+          Если Genially режет высоту — в самом Genially блоку iframe выставь “100%” и проверь настройки контейнера на слайде.
+        </div>
+      </div>
     </div>
 
+    <!-- RIGHT -->
     <div class="preview-panel">
-        <label>Предпросмотр результата:</label>
-        <div class="preview-box" id="previewArea"></div>
-        
-        <div style="background: white; padding: 20px; border-radius: 16px;">
-            <h3 style="margin-top:0;">Код для Genially</h3>
-            <textarea id="resultCode" readonly onclick="this.select()"></textarea>
+      <div class="panel">
+        <div class="section-title">
+          <div class="t">👀 Предпросмотр</div>
+          <div class="meta">высота окна: 850px</div>
         </div>
+        <div class="preview-box">
+          <div id="previewArea"></div>
+        </div>
+      </div>
+
+      <div class="panel code-panel">
+        <div class="section-title">
+          <div class="t">🧩 Код для Genially</div>
+          <div class="meta">клик по полю — выделить</div>
+        </div>
+        <div class="panel-inner">
+          <textarea id="resultCode" readonly onclick="this.select()"></textarea>
+          <div class="note">Код уже экранируется для srcdoc (кавычки → &amp;quot;). Механика генерации не изменена.</div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
 <script>
-    const dictionaryDB = {
-        "баклуши бить": "Бездельничать, заниматься пустяками.",
-        "без году неделя": "Совсем недавно, очень короткое время.",
-        "белая ворона": "Человек, резко выделяющийся из окружающей среды.",
-        "блоху подковать": "Искусно выполнить самую замысловатую работу.",
-        "в ежовых рукавицах": "Очень строго, сурово.",
-        "в час по чайной ложке": "Очень медленно.",
-        "вешать голову": "Унывать.",
-        "вилами по воде писано": "Исход не ясен, неизвестно как будет.",
-        "витать в облаках": "Фантазировать, мечтать.",
-        "водить за нос": "Обманывать, вводить в заблуждение.",
-        "водой не разлить": "О крепкой дружбе.",
-        "волосы дыбом": "Очень страшно.",
-        "вывести на чистую воду": "Разоблачить, уличить во лжи.",
-        "делать из мухи слона": "Сильно преувеличивать.",
-        "держать язык за зубами": "Молчать.",
-        "душа в пятки": "Сильный испуг.",
-        "зарубить на носу": "Крепко запомнить навсегда.",
-        "как в воду глядел": "Предвидел события.",
-        "как две капли воды": "Очень похожи.",
-        "как рыба в воде": "Чувствовать себя уверенно.",
-        "как с гуся вода": "Всё нипочем, безразлично.",
-        "клевать носом": "Дремать.",
-        "кот наплакал": "Очень мало.",
-        "крокодиловы слезы": "Притворное сожаление.",
-        "медведь на ухо наступил": "Нет музыкального слуха.",
-        "морочить голову": "Сбивать с толку.",
-        "на седьмом небе": "В полном восторге.",
-        "не в своей тарелке": "Чувствовать себя неуютно.",
-        "ни пуха ни пера": "Пожелание удачи.",
-        "обвести вокруг пальца": "Ловко обмануть.",
-        "после дождичка в четверг": "Никогда.",
-        "семь пятниц на неделе": "О человеке, часто меняющем решения.",
-        "сесть в калошу": "Оказаться в смешном положении, неудача.",
-        "сидеть сложа руки": "Бездельничать.",
-        "сквозь землю провалиться": "Сильно стыдиться.",
-        "смотреть сквозь пальцы": "Не замечать плохого.",
-        "собаку съел": "Иметь большой опыт.",
-        "считать ворон": "Отвлекаться.",
-        "тише воды ниже травы": "Быть незаметным.",
-        "тянуть кота за хвост": "Медлить.",
-        "умывать руки": "Снимать с себя ответственность.",
-        "хоть глаз выколи": "Очень темно.",
-        "язык проглотить": "Замолчать."
+  const dictionaryDB = {
+    "баклуши бить": "Бездельничать, заниматься пустяками.",
+    "без году неделя": "Совсем недавно, очень короткое время.",
+    "белая ворона": "Человек, резко выделяющийся из окружающей среды.",
+    "блоху подковать": "Искусно выполнить самую замысловатую работу.",
+    "в ежовых рукавицах": "Очень строго, сурово.",
+    "в час по чайной ложке": "Очень медленно.",
+    "вешать голову": "Унывать.",
+    "вилами по воде писано": "Исход не ясен, неизвестно как будет.",
+    "витать в облаках": "Фантазировать, мечтать.",
+    "водить за нос": "Обманывать, вводить в заблуждение.",
+    "водой не разлить": "О крепкой дружбе.",
+    "волосы дыбом": "Очень страшно.",
+    "вывести на чистую воду": "Разоблачить, уличить во лжи.",
+    "делать из мухи слона": "Сильно преувеличивать.",
+    "держать язык за зубами": "Молчать.",
+    "душа в пятки": "Сильный испуг.",
+    "зарубить на носу": "Крепко запомнить навсегда.",
+    "как в воду глядел": "Предвидел события.",
+    "как две капли воды": "Очень похожи.",
+    "как рыба в воде": "Чувствовать себя уверенно.",
+    "как с гуся вода": "Всё нипочем, безразлично.",
+    "клевать носом": "Дремать.",
+    "кот наплакал": "Очень мало.",
+    "крокодиловы слезы": "Притворное сожаление.",
+    "медведь на ухо наступил": "Нет музыкального слуха.",
+    "морочить голову": "Сбивать с толку.",
+    "на седьмом небе": "В полном восторге.",
+    "не в своей тарелке": "Чувствовать себя неуютно.",
+    "ни пуха ни пера": "Пожелание удачи.",
+    "обвести вокруг пальца": "Ловко обмануть.",
+    "после дождичка в четверг": "Никогда.",
+    "семь пятниц на неделе": "О человеке, часто меняющем решения.",
+    "сесть в калошу": "Оказаться в смешном положении, неудача.",
+    "сидеть сложа руки": "Бездельничать.",
+    "сквозь землю провалиться": "Сильно стыдиться.",
+    "смотреть сквозь пальцы": "Не замечать плохого.",
+    "собаку съел": "Иметь большой опыт.",
+    "считать ворон": "Отвлекаться.",
+    "тише воды ниже травы": "Быть незаметным.",
+    "тянуть кота за хвост": "Медлить.",
+    "умывать руки": "Снимать с себя ответственность.",
+    "хоть глаз выколи": "Очень темно.",
+    "язык проглотить": "Замолчать."
+  };
+
+  function initList() {
+    const container = document.getElementById('wordListContainer');
+    container.innerHTML = "";
+    Object.keys(dictionaryDB).sort().forEach((key, i) => {
+      const div = document.createElement('div');
+      div.className = 'check-item';
+      // механика та же: первые 6 выделены
+      div.innerHTML = `<label><input type="checkbox" value="${key}" ${i<6?'checked':''} onchange="updatePreview()"> ${key}</label>`;
+      container.appendChild(div);
+    });
+    updatePreview();
+  }
+
+  function toggleAll(state) {
+    document.querySelectorAll('#wordListContainer input').forEach(cb => cb.checked = state);
+    updatePreview();
+  }
+
+function getInnerHtml(settings, items) {
+  return `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+body{
+  margin:0;
+  padding:0;
+  font-family:'Segoe UI', sans-serif;
+  background:transparent;
+  width:100vw;
+  overflow-x:hidden;
+}
+
+/* масштабирование */
+.scaler{
+  width: calc(100vw / ${settings.scale} - 30px);
+  transform: scale(${settings.scale});
+  transform-origin: 0 0;
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+  padding:10px;
+  box-sizing:border-box;
+}
+
+/* карточка */
+.flip-card{
+  width:180px;
+  height:120px;
+  perspective:1000px;
+  cursor:pointer;
+  background:transparent;
+}
+
+/* внутренняя часть */
+.flip-card-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  transition:transform .6s ease;
+  border-radius:18px;
+  box-shadow:
+    0 10px 0 rgba(0,0,0,.25),
+    0 18px 28px rgba(0,0,0,.18);
+}
+
+/* переворот */
+.flip-card.flipped .flip-card-inner{
+  transform: rotateY(180deg);
+}
+
+/* стороны карточки */
+.flip-card-front,
+.flip-card-back{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:18px;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  border:3px solid rgba(15,23,42,.9);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px;
+  box-sizing:border-box;
+  text-align:center;
+}
+
+/* лицевая сторона */
+.flip-card-front{
+  background:${settings.cardColor};
+  color:${settings.textColor};
+}
+
+.flip-card-front::before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border-radius:14px;
+  border:2px dashed rgba(255,255,255,.55);
+  opacity:.9;
+  pointer-events:none;
+}
+
+.flip-card-front p{
+  width:100%;
+  margin:0;
+  font-size:1.1em;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  line-height:1.15;
+  text-align:center;
+  word-break:break-word;
+  text-shadow:2px 2px 0 rgba(0,0,0,.35);
+}
+
+/* обратная сторона */
+.flip-card-back{
+  background:#ffffff;
+  color:#0f172a;
+  transform: rotateY(180deg);
+}
+
+.flip-card-back::after{
+  content:"💬";
+  position:absolute;
+  top:8px;
+  right:10px;
+  font-size:18px;
+  opacity:.6;
+  pointer-events:none;
+}
+
+.flip-card-back p{
+  width:100%;
+  margin:0;
+  font-size:.9em;
+  line-height:1.35;
+  text-align:center;
+  word-break:break-word;
+}
+</style>
+</head>
+
+<body>
+  <div class="scaler">
+    ${items.map(item => `
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <p>${item.phrase}</p>
+          </div>
+          <div class="flip-card-back">
+            <p>${item.def}</p>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+</body>
+</html>`;
+}
+
+  function updatePreview() {
+    const settings = {
+      cardColor: document.getElementById('cardColor').value,
+      textColor: document.getElementById('textColor').value,
+      scale: document.getElementById('scaleInput').value
     };
+    document.getElementById('scaleVal').innerText = settings.scale;
 
-    function initList() {
-        const container = document.getElementById('wordListContainer');
-        Object.keys(dictionaryDB).sort().forEach((key, i) => {
-            const div = document.createElement('div');
-            div.className = 'check-item';
-            div.innerHTML = `<label><input type="checkbox" value="${key}" ${i<6?'checked':''} onchange="updatePreview()"> ${key}</label>`;
-            container.appendChild(div);
-        });
-        updatePreview();
-    }
+    const items = Array.from(document.querySelectorAll('#wordListContainer input:checked'))
+      .map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
 
-    function toggleAll(state) {
-        document.querySelectorAll('#wordListContainer input').forEach(cb => cb.checked = state);
-        updatePreview();
-    }
+    const iframe = document.createElement('iframe');
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+    iframe.style.background = "transparent";
 
-    function getInnerHtml(settings, items) {
-        return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-            body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: transparent; width: 100vw; overflow-x: hidden; }
-            .scaler {
-                width: calc(100vw / ${settings.scale} - 30px); 
-                transform: scale(${settings.scale});
-                transform-origin: 0 0;
-                display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;
-                padding: 10px; box-sizing: border-box;
-            }
-            .flip-card { background-color: transparent; width: 180px; height: 120px; perspective: 1000px; cursor: pointer; margin-bottom: 10px; }
-            .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.15); border-radius: 12px; }
-            .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-            .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; }
-            .flip-card-front { background-color: ${settings.cardColor}; color: ${settings.textColor}; }
-            .flip-card-front p { font-size: 1.1em; font-weight: bold; margin: 0; text-transform: uppercase; }
-            .flip-card-back { background-color: white; color: #333; transform: rotateY(180deg); border: 3px solid ${settings.cardColor}; }
-            .flip-card-back p { font-size: 0.9em; margin: 0; line-height: 1.3; }
-        </style>
-        </head>
-        <body>
-            <div class="scaler">
-                ${items.map(item => `
-                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front"><p>${item.phrase}</p></div>
-                            <div class="flip-card-back"><p>${item.def}</p></div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        </body>
-        </html>`;
-    }
+    document.getElementById('previewArea').innerHTML = '';
+    document.getElementById('previewArea').appendChild(iframe);
 
-    function updatePreview() {
-        const settings = {
-            cardColor: document.getElementById('cardColor').value,
-            textColor: document.getElementById('textColor').value,
-            scale: document.getElementById('scaleInput').value
-        };
-        document.getElementById('scaleVal').innerText = settings.scale;
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(getInnerHtml(settings, items));
+    doc.close();
+  }
 
-        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
-        
-        const iframe = document.createElement('iframe');
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        iframe.style.border = "none";
-        iframe.style.background = "#fcfcfc";
-        
-        document.getElementById('previewArea').innerHTML = '';
-        document.getElementById('previewArea').appendChild(iframe);
-        
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(getInnerHtml(settings, items));
-        doc.close();
-    }
+  function generateCode() {
+    const settings = {
+      cardColor: document.getElementById('cardColor').value,
+      textColor: document.getElementById('textColor').value,
+      scale: document.getElementById('scaleInput').value
+    };
+    const items = Array.from(document.querySelectorAll('#wordListContainer input:checked'))
+      .map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
 
-    function generateCode() {
-        const settings = {
-            cardColor: document.getElementById('cardColor').value,
-            textColor: document.getElementById('textColor').value,
-            scale: document.getElementById('scaleInput').value
-        };
-        const items = Array.from(document.querySelectorAll('#wordListContainer input:checked')).map(cb => ({ phrase: cb.value, def: dictionaryDB[cb.value] }));
+    if (items.length === 0) { alert("Выберите слова!"); return; }
 
-        if(items.length === 0) { alert("Выберите слова!"); return; }
+    let htmlContent = getInnerHtml(settings, items);
+    let escapedHtml = htmlContent.replace(/"/g, '&quot;');
 
-        let htmlContent = getInnerHtml(settings, items);
-        let escapedHtml = htmlContent.replace(/"/g, '&quot;');
-
-        const iframeCode = `<iframe 
+    const iframeCode = `<iframe 
     srcdoc="${escapedHtml}" 
     style="width: 100%; height: 100%; border: none; overflow: visible; background: transparent;"
     sandbox="allow-scripts allow-same-origin"
 ></iframe>`;
 
-        const textarea = document.getElementById('resultCode');
-        textarea.value = iframeCode;
-        textarea.style.background = "#e3f2fd";
-        setTimeout(() => textarea.style.background = "#fff", 500);
-    }
+    const textarea = document.getElementById('resultCode');
+    textarea.value = iframeCode;
 
-    initList();
+    // лёгкая подсветка (механика не меняется)
+    textarea.style.borderColor = "rgba(34,211,238,.45)";
+    textarea.style.boxShadow = "0 0 0 4px rgba(34,211,238,.12)";
+    setTimeout(() => {
+      textarea.style.borderColor = "rgba(255,255,255,.12)";
+      textarea.style.boxShadow = "none";
+    }, 650);
+  }
+
+  initList();
 </script>
 
 </body>
 </html>
-
